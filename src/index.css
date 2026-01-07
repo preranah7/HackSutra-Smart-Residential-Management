@@ -1,36 +1,148 @@
 /* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @import "tailwindcss";
 
-
-/* Custom global styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Define custom theme variables BEFORE @layer */
+@theme {
+  /* Border colors */
+  --color-border: #e5e7eb;
+  
+  /* Primary color palette */
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  
+  /* Custom shadow definitions */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  input, textarea, select {
+    @apply transition-all duration-200;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+  }
+
+  button {
+    @apply transition-all duration-200;
+  }
 }
 
-/* Custom scrollbar */
+@layer components {
+  /* Custom Button Styles */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500;
+  }
+
+  .btn-outline {
+    @apply border-2 border-gray-300 bg-white hover:bg-gray-50 focus:ring-primary-500;
+  }
+
+  /* Card Styles */
+  .card {
+    @apply bg-white rounded-xl shadow-card p-6 hover:shadow-hover transition-shadow duration-200;
+  }
+
+  .card-header {
+    @apply border-b border-gray-100 pb-4 mb-4;
+  }
+
+  /* Input Styles */
+  .input-field {
+    @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400;
+  }
+
+  .input-field:disabled {
+    @apply bg-gray-50 cursor-not-allowed;
+  }
+
+  /* Badge Styles */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-800;
+  }
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 2px solid #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #94a3b8;
+}
+
+/* Loading Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(to right, #f0f0f0 4%, #e0e0e0 25%, #f0f0f0 36%);
+  background-size: 1000px 100%;
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }

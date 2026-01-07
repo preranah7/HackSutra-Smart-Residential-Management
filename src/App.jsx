@@ -7,10 +7,10 @@ import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import PrivateRoute from './components/auth/PrivateRoute';
 
-// Dashboards (we'll create these)
-//import TenantDashboard from './components/tenant/TenantDashboard';
-//import LandlordDashboard from './components/landlord/LandlordDashboard';
-//import AdminDashboard from './components/admin/AdminDashboard';
+// Dashboards 
+import TenantDashboard from './components/tenant/TenantDashboard';
+import LandlordDashboard from './components/landlord/LandlordDashboard';
+import AdminDashboard from './components/admin/AdminDashboard';
 
 function App() {
   return (

@@ -4,18 +4,18 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROLES } from '../../utils/constants';
 import Alert from '../common/Alert';
-import { Home, Mail, Lock } from 'lucide-react';
+import { Building2, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { login, currentUser, userProfile } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
   useEffect(() => {
     if (currentUser && userProfile) {
       const role = userProfile.role;
@@ -37,7 +37,6 @@ function Login() {
       setError('');
       setLoading(true);
       await login(email, password);
-      // Redirect handled by useEffect above
     } catch (error) {
       console.error('Login failed:', error);
       if (error.code === 'auth/user-not-found') {
@@ -55,77 +54,212 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-            <Home className="w-8 h-8 text-primary-600" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-          <p className="text-gray-600 mt-2">Society Management System</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex">
+      {/* Left Side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 to-primary-800 p-12 flex-col justify-between relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/2 translate-y-1/2"></div>
         </div>
 
-        {error && <Alert type="error" message={error} onClose={() => setError('')} />}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="your.email@example.com"
-                required
-              />
+        <div className="relative z-10">
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+              <Building2 className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">SocietyHub</h1>
+              <p className="text-blue-100 text-sm">Smart Living Platform</p>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="••••••••"
-                required
-              />
+          <div className="space-y-8 mt-16">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Welcome Back!
+              </h2>
+              <p className="text-blue-100 text-lg leading-relaxed">
+                Manage your residential community with intelligent automation, 
+                transparent billing, and seamless communication.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <div className="text-3xl font-bold text-white mb-1">10K+</div>
+                <div className="text-blue-100 text-sm">Happy Residents</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <div className="text-3xl font-bold text-white mb-1">98%</div>
+                <div className="text-blue-100 text-sm">Satisfaction Rate</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10">
+          <p className="text-blue-100 text-sm">
+            © 2026 SocietyHub. Powered by Google AI
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center justify-center mb-8">
+            <div className="bg-primary-100 p-3 rounded-xl">
+              <Building2 className="w-8 h-8 text-primary-600" />
+            </div>
+            <div className="ml-3">
+              <h1 className="text-xl font-bold text-gray-900">SocietyHub</h1>
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 font-medium"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+          <div className="animate-slide-up">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Sign in to your account
+              </h2>
+              <p className="text-gray-600">
+                Enter your credentials to access your dashboard
+              </p>
+            </div>
 
-        <p className="text-center mt-6 text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
-            Sign up
-          </Link>
-        </p>
+            {error && (
+              <div className="animate-scale-in">
+                <Alert type="error" message={error} onClose={() => setError('')} />
+              </div>
+            )}
 
-        {/* Demo Credentials */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-sm font-semibold text-gray-700 mb-2">Demo Accounts:</p>
-          <div className="text-xs text-gray-600 space-y-1">
-            <p><strong>Tenant:</strong> tenant@test.com / Test@123</p>
-            <p><strong>Landlord:</strong> landlord@test.com / Test@123</p>
-            <p><strong>Admin:</strong> admin@test.com / Test@123</p>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="input-field pl-10"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-field pl-10 pr-10"
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-primary w-full py-3 text-base font-semibold flex items-center justify-center group"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign in
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-gray-500">
+                    New to SocietyHub?
+                  </span>
+                </div>
+              </div>
+
+              <Link
+                to="/signup"
+                className="mt-4 btn btn-outline w-full py-3 text-base font-semibold"
+              >
+                Create an account
+              </Link>
+            </div>
+
+            {/* Demo Credentials */}
+            <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+              <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2">
+                  Demo
+                </span>
+                Try these test accounts
+              </p>
+              <div className="space-y-2 text-xs text-gray-600">
+                <div className="flex items-center justify-between p-2 bg-white rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">Tenant</p>
+                    <p className="text-gray-500">tenant@test.com</p>
+                  </div>
+                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700">
+                    Test@123
+                  </code>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-white rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">Admin</p>
+                    <p className="text-gray-500">admin@test.com</p>
+                  </div>
+                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700">
+                    Test@123
+                  </code>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
