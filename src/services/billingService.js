@@ -58,6 +58,12 @@ export async function generateMonthlyBill(rentalId, month) {
 }
 
 export async function getTenantBills(tenantId) {
+  // Check if tenantId is valid
+  if (!tenantId) {
+    console.error('getTenantBills: tenantId is undefined or null');
+    return [];
+  }
+
   try {
     const q = query(
       collection(db, 'bills'),
@@ -76,6 +82,7 @@ export async function getTenantBills(tenantId) {
     return bills;
   } catch (error) {
     console.error('Error fetching bills:', error);
-    throw error;
+    // Return empty array instead of throwing
+    return [];
   }
 }

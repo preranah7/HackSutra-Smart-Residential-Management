@@ -6,22 +6,32 @@ import LoadingSpinner from '../common/LoadingSpinner';
 function PrivateRoute({ children, allowedRoles }) {
   const { currentUser, userProfile, loading } = useAuth();
 
+  console.log('PrivateRoute:', { currentUser: !!currentUser, userProfile: !!userProfile, loading });
+
   if (loading) {
-    return <LoadingSpinner text="Checking authentication..." />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner text="Loading..." />
+      </div>
+    );
   }
 
   if (!currentUser) {
-    return <Navigate to="/login" />;
+    console.log('No current user, redirecting to login');
+    return <Navigate to="/login" replace />;
   }
 
   if (!userProfile) {
-    return <LoadingSpinner text="Loading profile..." />;
+    console.log('No user profile, redirecting to login');
+    return <Navigate to="/login" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(userProfile.role)) {
-    return <Navigate to={`/${userProfile.role}`} />;
+    console.log('Wrong role, redirecting to:', userProfile.role);
+    return <Navigate to={`/${userProfile.role}`} replace />;
   }
 
+  console.log('Rendering protected content for role:', userProfile.role);
   return children;
 }
 
