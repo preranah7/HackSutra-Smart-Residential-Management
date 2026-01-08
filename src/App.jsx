@@ -1,27 +1,33 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-
-// Auth
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
-import PrivateRoute from './components/auth/PrivateRoute';
-
-// Dashboards 
 import TenantDashboard from './components/tenant/TenantDashboard';
 import LandlordDashboard from './components/landlord/LandlordDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
+import InitializeData from './components/admin/InitializeData';
+import PrivateRoute from './components/auth/PrivateRoute';
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
+    <AuthProvider>
+      <Router>
         <Routes>
-          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-
-          {/* Protected Routes - Tenant */}
+          
+          {/* Initialization Routes */}
+          <Route 
+            path="/initialize" 
+            element={
+              <PrivateRoute>
+                <InitializeData />
+              </PrivateRoute>
+            } 
+          />
+          
+          {/* Tenant Routes */}
           <Route 
             path="/tenant/*" 
             element={
@@ -30,33 +36,31 @@ function App() {
               </PrivateRoute>
             } 
           />
-
-          {/* Protected Routes - Landlord */}
+          
+          {/* Landlord Routes */}
           <Route 
-            path="/landlord" 
+            path="/landlord/*" 
             element={
               <PrivateRoute allowedRoles={['landlord']}>
                 <LandlordDashboard />
               </PrivateRoute>
             } 
           />
-
-          {/* Protected Routes - Admin */}
+          
+          {/* Admin Routes */}
           <Route 
-            path="/admin" 
+            path="/admin/*" 
             element={
               <PrivateRoute allowedRoles={['admin']}>
                 <AdminDashboard />
               </PrivateRoute>
             } 
           />
-
-          {/* Default Route */}
+          
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+      </Router>
+    </AuthProvider>
   );
 }
 

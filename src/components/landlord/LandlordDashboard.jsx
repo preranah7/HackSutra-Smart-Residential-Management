@@ -1,11 +1,55 @@
 // src/components/landlord/LandlordDashboard.jsx
+import { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Home, DollarSign, Users, TrendingUp, LogOut } from 'lucide-react';
+import { 
+  Home, DollarSign, Users, LogOut, Building, Plus, Receipt
+} from 'lucide-react';
+import { 
+  getLandlordProperties, 
+  getLandlordRevenue 
+} from '../../services/landlordService';
+import { getLandlordBillingStats } from '../../services/billingService';
+import LoadingSpinner from '../common/LoadingSpinner';
+import PropertyManagement from './PropertyManagement';
+import BillGeneration from './BillGeneration';
 
 function LandlordDashboard() {
   const { userProfile, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [properties, setProperties] = useState([]);
+  const [revenue, setRevenue] = useState(null);
+  const [billingStats, setBillingStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (userProfile?.uid) {
+      loadDashboardData();
+      // Real-time updates every 30 seconds
+      const interval = setInterval(loadDashboardData, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [userProfile]);
+
+  async function loadDashboardData() {
+    try {
+      const [propertiesData, revenueData, billingData] = await Promise.all([
+        getLandlordProperties(userProfile.uid),
+        getLandlordRevenue(userProfile.uid),
+        getLandlordBillingStats(userProfile.uid)
+      ]);
+
+      setProperties(propertiesData);
+      setRevenue(revenueData);
+      setBillingStats(billingData);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleLogout() {
     try {
@@ -16,110 +60,168 @@ function LandlordDashboard() {
     }
   }
 
+  const currentPath = location.pathname.split('/')[2] || 'dashboard';
+
+  const menuItems = [
+    { path: '', label: 'Dashboard', icon: Home },
+    { path: 'properties', label: 'Properties', icon: Building },
+    { path: 'generate-bill', label: 'Generate Bills', icon: Receipt }
+  ];
+
+  if (loading && currentPath === 'dashboard') {
+    return <LoadingSpinner />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Landlord Dashboard
-            </h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Welcome back, {userProfile.name}
-            </p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="btn btn-outline flex items-center space-x-2"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        {/* Coming Soon Banner */}
-        <div className="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-xl p-12 text-white text-center mb-8">
-          <div className="bg-white/20 backdrop-blur-sm w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Home className="w-10 h-10" />
-          </div>
-          <h2 className="text-3xl font-bold mb-4">Landlord Portal</h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Manage your rental properties, track payments, and communicate with tenants - all in one place.
-          </p>
-          <div className="inline-flex items-center bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30">
-            <div className="animate-pulse w-3 h-3 bg-white rounded-full mr-3"></div>
-            <span className="font-semibold">Coming in Version 2.0</span>
+      <header className="bg-white shadow-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Building className="w-8 h-8 text-blue-600" />
+              <h1 className="ml-2 text-xl font-bold text-gray-900">Landlord Portal</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">{userProfile.name}</p>
+                <p className="text-xs text-gray-500">{userProfile.email}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-full text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
+      </header>
 
-        {/* Feature Preview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="card">
-            <div className="bg-green-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-              <DollarSign className="w-6 h-6 text-green-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Payment Tracking
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Monitor rent payments, track outstanding amounts, and view payment history for all your properties.
-            </p>
-          </div>
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className="w-64 bg-white shadow-lg min-h-screen">
+          <nav className="p-4 space-y-2">
+            {menuItems.map(item => (
+              <button
+                key={item.path}
+                onClick={() => navigate(`/landlord/${item.path}`)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                  currentPath === (item.path || 'dashboard')
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
 
-          <div className="card">
-            <div className="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-              <Users className="w-6 h-6 text-blue-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Tenant Management
-            </h3>
-            <p className="text-gray-600 text-sm">
-              View tenant details, lease agreements, and communication history all in one dashboard.
-            </p>
-          </div>
+        {/* Main Content */}
+        <main className="flex-1 p-6">
+          <Routes>
+            <Route path="/" element={
+              <div className="max-w-7xl mx-auto">
+                <div className="mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    Welcome back, {userProfile.name}
+                  </h2>
+                  <p className="text-gray-600 mt-2">
+                    Manage your rental properties and track payments
+                  </p>
+                </div>
 
-          <div className="card">
-            <div className="bg-purple-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-              <TrendingUp className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Financial Reports
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Generate comprehensive reports on rental income, expenses, and ROI across all properties.
-            </p>
-          </div>
-        </div>
-
-        {/* Sample Properties Preview */}
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Properties (Preview)</h2>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="card opacity-60 cursor-not-allowed">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-                      {i}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">Flat {300 + i}</p>
-                      <p className="text-sm text-gray-600">Sunshine Apartments</p>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Properties</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">
+                          {properties.length}
+                        </p>
+                      </div>
+                      <Home className="w-12 h-12 text-blue-500 opacity-20" />
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">₹{15 + i},000/month</p>
-                    <span className="badge badge-success">Occupied</span>
+
+                  <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">
+                          ₹{revenue?.totalMonthly?.toLocaleString() || '0'}
+                        </p>
+                      </div>
+                      <DollarSign className="w-12 h-12 text-green-500 opacity-20" />
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-yellow-500">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Collected</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">
+                          ₹{billingStats?.collected?.toLocaleString() || '0'}
+                        </p>
+                      </div>
+                      <Receipt className="w-12 h-12 text-yellow-500 opacity-20" />
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Pending</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">
+                          ₹{billingStats?.pending?.toLocaleString() || '0'}
+                        </p>
+                      </div>
+                      <DollarSign className="w-12 h-12 text-red-500 opacity-20" />
+                    </div>
                   </div>
                 </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <button
+                    onClick={() => navigate('/landlord/properties')}
+                    className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition text-left"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-blue-100 p-3 rounded-lg">
+                        <Plus className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900">Add New Property</h3>
+                        <p className="text-sm text-gray-500">Register a new rental property</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/landlord/generate-bill')}
+                    className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition text-left"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-green-100 p-3 rounded-lg">
+                        <Receipt className="w-6 h-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900">Generate Bills</h3>
+                        <p className="text-sm text-gray-500">Create bills using AI</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
+            } />
+            <Route path="/properties" element={<PropertyManagement />} />
+            <Route path="/generate-bill" element={<BillGeneration />} />
+          </Routes>
+        </main>
       </div>
     </div>
   );

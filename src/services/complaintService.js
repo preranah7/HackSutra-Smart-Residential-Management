@@ -1,19 +1,64 @@
 // src/services/complaintService.js
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  query, 
-  where, 
-  orderBy,
-  doc,
-  updateDoc,
-  getDoc
+import {
+  collection, addDoc, getDocs, query, where, orderBy, doc,
+  updateDoc, getDoc, onSnapshot, serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { categorizeComplaint } from './geminiService';
 
-// Create a new complaint
+// Real-time complaints subscription for user
+export function subscribeToUserComplaints(userId, callback) {
+  if (!userId) {
+    console.error('subscribeToUserComplaints: userId is required');
+    return () => {};
+  }
+
+  const q = query(
+    collection(db, 'complaints'),
+    where('userId', '==', userId),
+    orderBy('createdAt', 'desc')
+  );
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const complaints = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      callback(complaints);
+    },
+    (error) => {
+      console.error('Error in complaints subscription:', error);
+      callback([]);
+    }
+  );
+}
+
+// Real-time all complaints subscription (for admin)
+export function subscribeToAllComplaints(callback) {
+  const q = query(
+    collection(db, 'complaints'),
+    orderBy('createdAt', 'desc')
+  );
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const complaints = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      callback(complaints);
+    },
+    (error) => {
+      console.error('Error in all complaints subscription:', error);
+      callback([]);
+    }
+  );
+}
+
+// Create a new complaint with AI categorization
 export async function createComplaint(complaintData) {
   try {
     // Use AI to categorize and prioritize
@@ -39,12 +84,11 @@ export async function createComplaint(complaintData) {
       suggestedAction: aiAnalysis.suggestedAction,
       assignTo: aiAnalysis.assignTo,
       status: 'open',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     };
 
     const docRef = await addDoc(collection(db, 'complaints'), complaint);
-    
     return { id: docRef.id, ...complaint };
   } catch (error) {
     console.error('Error creating complaint:', error);
@@ -53,8 +97,8 @@ export async function createComplaint(complaintData) {
 }
 
 // Get complaints for a specific user
+
 export async function getUserComplaints(userId) {
-  // Validate userId
   if (!userId) {
     console.error('getUserComplaints: userId is undefined or null');
     return [];
@@ -66,43 +110,49 @@ export async function getUserComplaints(userId) {
       where('userId', '==', userId),
       orderBy('createdAt', 'desc')
     );
-    
+
     const snapshot = await getDocs(q);
     const complaints = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
-    
+
     return complaints;
   } catch (error) {
     console.error('Error fetching user complaints:', error);
-    // Return demo complaints
-    return [
-      {
-        id: 'demo-1',
-        category: 'plumbing',
-        title: 'Leaking tap in bathroom',
-        description: 'The tap in the master bathroom has been leaking for 2 days',
-        location: 'Master bathroom',
-        priority: 'medium',
-        status: 'in-progress',
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        adminResponse: 'Plumber has been assigned. Will visit tomorrow morning.'
-      },
-      {
-        id: 'demo-2',
-        category: 'electrical',
-        title: 'Power socket not working',
-        description: 'The power socket in living room is not working',
-        location: 'Living room',
-        priority: 'high',
-        status: 'resolved',
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        adminResponse: 'Fixed by electrician. Socket replaced.'
+    
+    // If index error, fetch without ordering
+    if (error.code === 'failed-precondition' || error.message.includes('index')) {
+      console.log('Fetching complaints without ordering (index not ready)...');
+      try {
+        const simpleQuery = query(
+          collection(db, 'complaints'),
+          where('userId', '==', userId)
+        );
+        const snapshot = await getDocs(simpleQuery);
+        const complaints = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Sort manually
+        complaints.sort((a, b) => {
+          const aTime = a.createdAt?.seconds || 0;
+          const bTime = b.createdAt?.seconds || 0;
+          return bTime - aTime;
+        });
+        
+        return complaints;
+      } catch (fallbackError) {
+        console.error('Fallback query also failed:', fallbackError);
+        return [];
       }
-    ];
+    }
+    
+    return [];
   }
 }
+
 
 // Get all complaints (for admin)
 export async function getAllComplaints() {
@@ -111,13 +161,13 @@ export async function getAllComplaints() {
       collection(db, 'complaints'),
       orderBy('createdAt', 'desc')
     );
-    
+
     const snapshot = await getDocs(q);
     const complaints = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
-    
+
     return complaints;
   } catch (error) {
     console.error('Error fetching all complaints:', error);
@@ -125,26 +175,24 @@ export async function getAllComplaints() {
   }
 }
 
-// Update complaint status
+// Update complaint status with notification
 export async function updateComplaintStatus(complaintId, status, adminResponse = null) {
   try {
     const complaintRef = doc(db, 'complaints', complaintId);
-    
     const updates = {
       status,
-      updatedAt: new Date().toISOString()
+      updatedAt: serverTimestamp()
     };
-    
+
     if (adminResponse) {
       updates.adminResponse = adminResponse;
     }
-    
+
     if (status === 'resolved' || status === 'closed') {
-      updates.resolvedAt = new Date().toISOString();
+      updates.resolvedAt = serverTimestamp();
     }
-    
+
     await updateDoc(complaintRef, updates);
-    
     return true;
   } catch (error) {
     console.error('Error updating complaint status:', error);
@@ -157,7 +205,7 @@ export async function getComplaintStatistics() {
   try {
     const snapshot = await getDocs(collection(db, 'complaints'));
     const complaints = snapshot.docs.map(doc => doc.data());
-    
+
     const stats = {
       total: complaints.length,
       open: complaints.filter(c => c.status === 'open').length,
@@ -172,48 +220,42 @@ export async function getComplaintStatistics() {
         low: complaints.filter(c => c.priority === 'low').length
       }
     };
-    
+
     // Calculate by category
     complaints.forEach(c => {
       stats.byCategory[c.category] = (stats.byCategory[c.category] || 0) + 1;
     });
-    
+
     // Calculate average resolution time
     const resolvedComplaints = complaints.filter(c => c.resolvedAt);
     if (resolvedComplaints.length > 0) {
       const totalTime = resolvedComplaints.reduce((sum, c) => {
-        const created = new Date(c.createdAt);
-        const resolved = new Date(c.resolvedAt);
+        const created = c.createdAt?.toDate ? c.createdAt.toDate() : new Date(c.createdAt);
+        const resolved = c.resolvedAt?.toDate ? c.resolvedAt.toDate() : new Date(c.resolvedAt);
         return sum + (resolved - created);
       }, 0);
       stats.avgResolutionTime = Math.round(totalTime / resolvedComplaints.length / (1000 * 60 * 60 * 24)); // in days
     } else {
       stats.avgResolutionTime = 0;
     }
-    
+
     return stats;
   } catch (error) {
     console.error('Error fetching complaint statistics:', error);
     return {
-      total: 23,
-      open: 5,
-      inProgress: 8,
-      resolved: 10,
+      total: 0,
+      open: 0,
+      inProgress: 0,
+      resolved: 0,
       closed: 0,
-      byCategory: {
-        plumbing: 8,
-        electrical: 6,
-        carpentry: 3,
-        cleaning: 4,
-        other: 2
-      },
+      byCategory: {},
       byPriority: {
-        emergency: 2,
-        high: 6,
-        medium: 10,
-        low: 5
+        emergency: 0,
+        high: 0,
+        medium: 0,
+        low: 0
       },
-      avgResolutionTime: 3
+      avgResolutionTime: 0
     };
   }
 }
@@ -222,18 +264,46 @@ export async function getComplaintStatistics() {
 export async function assignComplaint(complaintId, workerId, workerName) {
   try {
     const complaintRef = doc(db, 'complaints', complaintId);
-    
     await updateDoc(complaintRef, {
       status: 'in-progress',
       assignedTo: workerId,
       assignedWorker: workerName,
-      assignedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      assignedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
-    
     return true;
   } catch (error) {
     console.error('Error assigning complaint:', error);
+    throw error;
+  }
+}
+
+// Add comment to complaint
+export async function addComplaintComment(complaintId, comment, userId, userName) {
+  try {
+    const complaintRef = doc(db, 'complaints', complaintId);
+    const complaintDoc = await getDoc(complaintRef);
+    
+    if (!complaintDoc.exists()) {
+      throw new Error('Complaint not found');
+    }
+
+    const currentComments = complaintDoc.data().comments || [];
+    const newComment = {
+      text: comment,
+      userId,
+      userName,
+      timestamp: new Date().toISOString()
+    };
+
+    await updateDoc(complaintRef, {
+      comments: [...currentComments, newComment],
+      updatedAt: serverTimestamp()
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error adding comment:', error);
     throw error;
   }
 }

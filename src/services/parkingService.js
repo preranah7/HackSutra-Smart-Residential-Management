@@ -1,15 +1,57 @@
 // src/services/parkingService.js
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  query, 
-  where, 
-  updateDoc,
-  doc,
-  getDoc
+import {
+  collection, addDoc, getDocs, query, where, updateDoc, doc, getDoc,
+  onSnapshot, serverTimestamp, deleteDoc, Timestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
+
+// Real-time parking slots subscription
+export function subscribeToParkingSlots(callback) {
+  return onSnapshot(
+    collection(db, 'parkingSlots'),
+    (snapshot) => {
+      const slots = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      slots.sort((a, b) => a.slotNumber.localeCompare(b.slotNumber));
+      callback(slots);
+    },
+    (error) => {
+      console.error('Error in parking slots subscription:', error);
+      callback(generateDemoParkingSlots());
+    }
+  );
+}
+
+// Real-time user bookings subscription
+export function subscribeToUserBookings(userId, callback) {
+  if (!userId) {
+    console.error('subscribeToUserBookings: userId is required');
+    return () => {};
+  }
+
+  const bookingsQuery = query(
+    collection(db, 'parkingBookings'),
+    where('userId', '==', userId)
+  );
+
+  return onSnapshot(
+    bookingsQuery,
+    (snapshot) => {
+      const bookings = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      callback(bookings);
+    },
+    (error) => {
+      console.error('Error in bookings subscription:', error);
+      callback([]);
+    }
+  );
+}
 
 // Initialize parking slots (run once for setup)
 export async function initializeParkingSlots() {
@@ -25,10 +67,11 @@ export async function initializeParkingSlots() {
         status: 'available',
         assignedTo: null,
         assignedName: null,
-        flatNumber: null
+        flatNumber: null,
+        createdAt: serverTimestamp()
       });
     }
-    
+
     // Create 20 visitor slots
     for (let i = 1; i <= 20; i++) {
       slots.push({
@@ -36,15 +79,16 @@ export async function initializeParkingSlots() {
         type: 'visitor',
         level: 'Ground',
         status: 'available',
-        assignedTo: null
+        assignedTo: null,
+        createdAt: serverTimestamp()
       });
     }
-    
+
     // Add to Firestore
     for (const slot of slots) {
       await addDoc(collection(db, 'parkingSlots'), slot);
     }
-    
+
     console.log('Parking slots initialized successfully');
     return true;
   } catch (error) {
@@ -61,11 +105,9 @@ export async function getParkingSlots() {
       id: doc.id,
       ...doc.data()
     }));
-    
     return slots.sort((a, b) => a.slotNumber.localeCompare(b.slotNumber));
   } catch (error) {
     console.error('Error fetching parking slots:', error);
-    // Return demo data if Firestore fails
     return generateDemoParkingSlots();
   }
 }
@@ -73,7 +115,6 @@ export async function getParkingSlots() {
 // Generate demo parking slots for testing
 function generateDemoParkingSlots() {
   const slots = [];
-  
   for (let i = 1; i <= 50; i++) {
     slots.push({
       id: `demo-r-${i}`,
@@ -84,7 +125,7 @@ function generateDemoParkingSlots() {
       assignedTo: i % 3 === 0 ? 'demo-user' : null
     });
   }
-  
+
   for (let i = 1; i <= 20; i++) {
     slots.push({
       id: `demo-v-${i}`,
@@ -94,7 +135,7 @@ function generateDemoParkingSlots() {
       status: i % 4 === 0 ? 'occupied' : 'available'
     });
   }
-  
+
   return slots;
 }
 
@@ -107,9 +148,8 @@ export async function assignParkingSlot(slotId, userId, userName, flatNumber) {
       assignedTo: userId,
       assignedName: userName,
       flatNumber: flatNumber,
-      assignedAt: new Date().toISOString()
+      assignedAt: serverTimestamp()
     });
-    
     return true;
   } catch (error) {
     console.error('Error assigning parking slot:', error);
@@ -117,41 +157,41 @@ export async function assignParkingSlot(slotId, userId, userName, flatNumber) {
   }
 }
 
-// Book visitor parking
+// Book visitor parking with real-time validation
 export async function bookVisitorParking(bookingData) {
   try {
-    // Check if slot is available
+    // Check if slot is available in real-time
     const slotsQuery = query(
       collection(db, 'parkingSlots'),
       where('type', '==', 'visitor'),
       where('status', '==', 'available')
     );
-    
     const availableSlots = await getDocs(slotsQuery);
-    
+
     if (availableSlots.empty) {
       throw new Error('No visitor parking slots available');
     }
-    
+
     // Get first available slot
     const slot = availableSlots.docs[0];
-    
+
     // Create booking
     const booking = await addDoc(collection(db, 'parkingBookings'), {
       ...bookingData,
       slotId: slot.id,
       slotNumber: slot.data().slotNumber,
       status: 'active',
-      createdAt: new Date().toISOString()
+      createdAt: serverTimestamp()
     });
-    
-    // Update slot status
+
+    // Update slot status immediately
     await updateDoc(doc(db, 'parkingSlots', slot.id), {
       status: 'reserved',
       reservedBy: bookingData.userId,
-      reservedUntil: `${bookingData.date} ${bookingData.endTime}`
+      reservedUntil: `${bookingData.date} ${bookingData.endTime}`,
+      updatedAt: serverTimestamp()
     });
-    
+
     return { id: booking.id, slotNumber: slot.data().slotNumber };
   } catch (error) {
     console.error('Error booking visitor parking:', error);
@@ -161,7 +201,6 @@ export async function bookVisitorParking(bookingData) {
 
 // Get user's parking bookings
 export async function getUserParkingBookings(userId) {
-  // Validate userId
   if (!userId) {
     console.error('getUserParkingBookings: userId is undefined or null');
     return [];
@@ -172,62 +211,47 @@ export async function getUserParkingBookings(userId) {
       collection(db, 'parkingBookings'),
       where('userId', '==', userId)
     );
-    
     const snapshot = await getDocs(bookingsQuery);
     const bookings = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
-    
-    // Sort by date descending
+
     bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    
     return bookings;
   } catch (error) {
     console.error('Error fetching bookings:', error);
-    // Return demo bookings
-    return [
-      {
-        id: 'demo-1',
-        visitorName: 'John Doe',
-        vehicleNumber: 'MH12AB1234',
-        date: new Date().toISOString().split('T')[0],
-        startTime: '10:00',
-        endTime: '12:00',
-        slotNumber: 'V-05',
-        status: 'active'
-      }
-    ];
+    return [];
   }
 }
 
 // Cancel parking booking
 export async function cancelParkingBooking(bookingId) {
   try {
-    // Get booking details first
     const bookingRef = doc(db, 'parkingBookings', bookingId);
     const bookingDoc = await getDoc(bookingRef);
-    
+
     if (bookingDoc.exists()) {
       const booking = bookingDoc.data();
-      
+
       // Free up the slot
       if (booking.slotId) {
         const slotRef = doc(db, 'parkingSlots', booking.slotId);
         await updateDoc(slotRef, {
           status: 'available',
           reservedBy: null,
-          reservedUntil: null
+          reservedUntil: null,
+          updatedAt: serverTimestamp()
         });
       }
-      
+
       // Update booking status
       await updateDoc(bookingRef, {
         status: 'cancelled',
-        cancelledAt: new Date().toISOString()
+        cancelledAt: serverTimestamp()
       });
     }
-    
+
     return true;
   } catch (error) {
     console.error('Error cancelling booking:', error);
@@ -235,11 +259,10 @@ export async function cancelParkingBooking(bookingId) {
   }
 }
 
-// Get parking statistics
+// Get parking statistics with real-time data
 export async function getParkingStats() {
   try {
     const slots = await getParkingSlots();
-    
     const stats = {
       totalSlots: slots.length,
       residentSlots: slots.filter(s => s.type === 'resident').length,
@@ -248,7 +271,7 @@ export async function getParkingStats() {
       available: slots.filter(s => s.status === 'available').length,
       reserved: slots.filter(s => s.status === 'reserved').length
     };
-    
+
     return stats;
   } catch (error) {
     console.error('Error fetching parking stats:', error);
@@ -260,5 +283,29 @@ export async function getParkingStats() {
       available: 30,
       reserved: 5
     };
+  }
+}
+
+// Auto-expire visitor bookings (call this periodically)
+export async function autoExpireBookings() {
+  try {
+    const now = new Date();
+    const bookingsQuery = query(
+      collection(db, 'parkingBookings'),
+      where('status', '==', 'active')
+    );
+    
+    const snapshot = await getDocs(bookingsQuery);
+    
+    for (const bookingDoc of snapshot.docs) {
+      const booking = bookingDoc.data();
+      const endDateTime = new Date(`${booking.date} ${booking.endTime}`);
+      
+      if (endDateTime < now) {
+        await cancelParkingBooking(bookingDoc.id);
+      }
+    }
+  } catch (error) {
+    console.error('Error auto-expiring bookings:', error);
   }
 }
