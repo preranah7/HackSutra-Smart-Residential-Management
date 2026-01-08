@@ -26,6 +26,7 @@ export function AuthProvider({ children }) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
       await setDoc(doc(db, 'users', userCredential.user.uid), {
+        uid: userCredential.user.uid,
         email: email,
         name: userData.name,
         role: userData.role,
@@ -68,6 +69,7 @@ export function AuthProvider({ children }) {
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log('Auth state changed:', user?.email);
       setCurrentUser(user);
       
       if (user) {
@@ -76,10 +78,16 @@ export function AuthProvider({ children }) {
           const docSnap = await getDoc(docRef);
           
           if (docSnap.exists()) {
-            setUserProfile(docSnap.data());
+            const profile = { uid: user.uid, ...docSnap.data() };
+            console.log('User profile loaded:', profile);
+            setUserProfile(profile);
+          } else {
+            console.error('User profile not found in Firestore');
+            setUserProfile(null);
           }
         } catch (error) {
           console.error("Error fetching user profile:", error);
+          setUserProfile(null);
         }
       } else {
         setUserProfile(null);
@@ -102,7 +110,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

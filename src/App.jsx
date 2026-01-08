@@ -21,7 +21,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* Protected Routes */}
+          {/* Protected Routes - Tenant */}
           <Route 
             path="/tenant/*" 
             element={
@@ -31,8 +31,9 @@ function App() {
             } 
           />
 
+          {/* Protected Routes - Landlord */}
           <Route 
-            path="/landlord/*" 
+            path="/landlord" 
             element={
               <PrivateRoute allowedRoles={['landlord']}>
                 <LandlordDashboard />
@@ -40,8 +41,9 @@ function App() {
             } 
           />
 
+          {/* Protected Routes - Admin */}
           <Route 
-            path="/admin/*" 
+            path="/admin" 
             element={
               <PrivateRoute allowedRoles={['admin']}>
                 <AdminDashboard />
@@ -50,7 +52,8 @@ function App() {
           />
 
           {/* Default Route */}
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
