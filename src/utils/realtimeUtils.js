@@ -1,9 +1,5 @@
 // src/utils/realtimeUtils.js
 
-/**
- * Utility functions for real-time features
- */
-
 // Format Firestore timestamp to readable date
 export function formatFirestoreDate(timestamp) {
   if (!timestamp) return 'N/A';

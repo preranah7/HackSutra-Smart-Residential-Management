@@ -1,30 +1,25 @@
 // src/services/billingService.js
-// 
-// KEY CHANGES:
-// - Line 58: Now checks property.tenant instead of property.tenantId
-// - Line 59: Better error message telling user to assign tenant first
-// - Line 137: Uses tenant email/name as tenantId for bill tracking
-//
-import { 
+
+import {
   collection, addDoc, query, where, getDocs, doc, getDoc, onSnapshot,
-  updateDoc, serverTimestamp 
+  updateDoc, serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { generateBillWithAI } from './geminiService';
 
-// Real-time bill subscription for tenant
-export function subscribeToBills(tenantId, callback) {
-  if (!tenantId) {
-    console.error('subscribeToBills: tenantId is required');
+// Real-time bill subscription for tenant - using email
+export function subscribeToBills(userEmail, callback) {
+  if (!userEmail) {
+    console.error('subscribeToBills: userEmail is required');
     return () => {};
   }
 
   const billsQuery = query(
     collection(db, 'bills'),
-    where('tenantId', '==', tenantId)
+    where('tenantEmail', '==', userEmail)
   );
 
-  return onSnapshot(billsQuery, 
+  return onSnapshot(billsQuery,
     (snapshot) => {
       const bills = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -59,9 +54,13 @@ export async function generateMonthlyBillForProperty(billData) {
       throw new Error('Invalid property data');
     }
 
-    // ✅ FIXED: Check for tenant name instead of tenantId
+    // Check for tenant
     if (!property.tenant || property.status !== 'occupied') {
       throw new Error('Property must have an assigned tenant. Please assign a tenant to this property first.');
+    }
+
+    if (!property.tenantEmail) {
+      throw new Error('Tenant email is missing. Please ensure the tenant has an email address.');
     }
 
     if (!landlordId) {
@@ -81,10 +80,10 @@ export async function generateMonthlyBillForProperty(billData) {
       where('month', '==', month)
     );
     const billSnapshot = await getDocs(existingBills);
-    
     if (!billSnapshot.empty) {
       throw new Error('Bill already exists for this property and month');
     }
+
     console.log('9. No existing bill found');
 
     // Calculate charges
@@ -103,12 +102,12 @@ export async function generateMonthlyBillForProperty(billData) {
       where('month', '==', prevMonthStr)
     );
     const prevBillSnapshot = await getDocs(prevBillQuery);
-    
     let lastMonthStatus = 'paid';
     if (!prevBillSnapshot.empty) {
       const prevBill = prevBillSnapshot.docs[0].data();
       lastMonthStatus = prevBill.status;
     }
+
     console.log('10. Previous month status:', lastMonthStatus);
 
     // Use AI to generate bill
@@ -127,6 +126,7 @@ export async function generateMonthlyBillForProperty(billData) {
       previousBalance: 0,
       lastMonthStatus: lastMonthStatus
     });
+
     console.log('12. AI bill data:', aiBillData);
 
     // Ensure we have a valid total
@@ -134,13 +134,12 @@ export async function generateMonthlyBillForProperty(billData) {
       throw new Error('Invalid bill total calculated by AI');
     }
 
-    // ✅ FIXED: Create bill document using tenant name and email
+    // Create bill document using tenant email for querying
     const billDoc = {
       propertyId: property.id,
       landlordId: landlordId,
-      tenantId: property.tenantEmail || property.tenant, // Use email or name as identifier
+      tenantEmail: property.tenantEmail, 
       tenantName: property.tenant,
-      tenantEmail: property.tenantEmail || '',
       tenantPhone: property.tenantPhone || '',
       flatNumber: property.flatNumber,
       month: month,
@@ -168,18 +167,19 @@ export async function generateMonthlyBillForProperty(billData) {
     const docRef = await addDoc(collection(db, 'bills'), billDoc);
     console.log('15. ✅ Bill created successfully with ID:', docRef.id);
 
-    return { 
-      id: docRef.id, 
+    return {
+      id: docRef.id,
       ...billDoc,
       generatedAt: new Date().toISOString()
     };
+
   } catch (error) {
     console.error('=== BILL GENERATION ERROR ===');
     console.error('Error object:', error);
     console.error('Error code:', error.code);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
-    
+
     if (error.code === 'permission-denied') {
       console.error('PERMISSION DENIED - Check these things:');
       console.error('1. Is the user logged in?');
@@ -196,17 +196,17 @@ export async function generateMonthlyBillForProperty(billData) {
   }
 }
 
-// Get tenant bills (fallback for non-subscription)
-export async function getTenantBills(tenantId) {
-  if (!tenantId) {
-    console.error('getTenantBills: tenantId is undefined or null');
+// Get tenant bills (fallback for non-subscription) - using email
+export async function getTenantBills(userEmail) {
+  if (!userEmail) {
+    console.error('getTenantBills: userEmail is undefined or null');
     return [];
   }
 
   try {
     const q = query(
       collection(db, 'bills'),
-      where('tenantId', '==', tenantId)
+      where('tenantEmail', '==', userEmail)
     );
     const snapshot = await getDocs(q);
     const bills = snapshot.docs.map(doc => ({
@@ -245,7 +245,6 @@ export async function downloadBill(billId) {
     if (!billDoc.exists()) {
       throw new Error('Bill not found');
     }
-    
     return {
       id: billId,
       ...billDoc.data()
@@ -264,19 +263,18 @@ export async function getLandlordBillingStats(landlordId) {
       where('landlordId', '==', landlordId)
     );
     const snapshot = await getDocs(q);
-    
+
     let totalRevenue = 0;
     let collected = 0;
     let pending = 0;
     let overdue = 0;
-
     const now = new Date();
 
     snapshot.docs.forEach(doc => {
       const bill = doc.data();
       const total = bill.total || 0;
       totalRevenue += total;
-      
+
       if (bill.status === 'paid') {
         collected += total;
       } else {
@@ -316,9 +314,8 @@ export async function markOverdueBills() {
       collection(db, 'bills'),
       where('status', '==', 'pending')
     );
-    
     const snapshot = await getDocs(overdueQuery);
-    
+
     for (const billDoc of snapshot.docs) {
       const bill = billDoc.data();
       if (bill.dueDate && bill.dueDate < now) {
