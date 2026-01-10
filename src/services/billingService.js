@@ -1,24 +1,25 @@
 // src/services/billingService.js
-import { 
+
+import {
   collection, addDoc, query, where, getDocs, doc, getDoc, onSnapshot,
-  updateDoc, serverTimestamp 
+  updateDoc, serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { generateBillWithAI } from './geminiService';
 
-// Real-time bill subscription for tenant
-export function subscribeToBills(tenantId, callback) {
-  if (!tenantId) {
-    console.error('subscribeToBills: tenantId is required');
+// Real-time bill subscription for tenant - using email
+export function subscribeToBills(userEmail, callback) {
+  if (!userEmail) {
+    console.error('subscribeToBills: userEmail is required');
     return () => {};
   }
 
   const billsQuery = query(
     collection(db, 'bills'),
-    where('tenantId', '==', tenantId)
+    where('tenantEmail', '==', userEmail)
   );
 
-  return onSnapshot(billsQuery, 
+  return onSnapshot(billsQuery,
     (snapshot) => {
       const bills = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -35,8 +36,6 @@ export function subscribeToBills(tenantId, callback) {
 }
 
 // Generate monthly bill with AI for a property
-
-
 export async function generateMonthlyBillForProperty(billData) {
   try {
     const { property, month, waterUsage, electricityUsage, additionalCharges, discount, landlordId } = billData;
@@ -45,16 +44,23 @@ export async function generateMonthlyBillForProperty(billData) {
     console.log('1. Landlord ID:', landlordId);
     console.log('2. Property ID:', property.id);
     console.log('3. Property Landlord ID:', property.landlordId);
-    console.log('4. Tenant ID:', property.tenantId);
-    console.log('5. Month:', month);
+    console.log('4. Tenant Name:', property.tenant);
+    console.log('5. Tenant Email:', property.tenantEmail);
+    console.log('6. Property Status:', property.status);
+    console.log('7. Month:', month);
 
     // Validate inputs
     if (!property || !property.id) {
       throw new Error('Invalid property data');
     }
 
-    if (!property.tenantId) {
-      throw new Error('Property must have an assigned tenant');
+    // Check for tenant
+    if (!property.tenant || property.status !== 'occupied') {
+      throw new Error('Property must have an assigned tenant. Please assign a tenant to this property first.');
+    }
+
+    if (!property.tenantEmail) {
+      throw new Error('Tenant email is missing. Please ensure the tenant has an email address.');
     }
 
     if (!landlordId) {
@@ -67,18 +73,18 @@ export async function generateMonthlyBillForProperty(billData) {
     }
 
     // Check if bill already exists
-    console.log('6. Checking for existing bills...');
+    console.log('8. Checking for existing bills...');
     const existingBills = query(
       collection(db, 'bills'),
       where('propertyId', '==', property.id),
       where('month', '==', month)
     );
     const billSnapshot = await getDocs(existingBills);
-    
     if (!billSnapshot.empty) {
       throw new Error('Bill already exists for this property and month');
     }
-    console.log('7. No existing bill found');
+
+    console.log('9. No existing bill found');
 
     // Calculate charges
     const parkingCharges = (property.parkingSlots || 0) * 500;
@@ -96,16 +102,16 @@ export async function generateMonthlyBillForProperty(billData) {
       where('month', '==', prevMonthStr)
     );
     const prevBillSnapshot = await getDocs(prevBillQuery);
-    
     let lastMonthStatus = 'paid';
     if (!prevBillSnapshot.empty) {
       const prevBill = prevBillSnapshot.docs[0].data();
       lastMonthStatus = prevBill.status;
     }
-    console.log('8. Previous month status:', lastMonthStatus);
+
+    console.log('10. Previous month status:', lastMonthStatus);
 
     // Use AI to generate bill
-    console.log('9. Calling Gemini AI...');
+    console.log('11. Calling Gemini AI...');
     const aiBillData = await generateBillWithAI({
       monthlyRent: property.monthlyRent,
       maintenanceCharges: property.maintenanceCharges,
@@ -120,22 +126,24 @@ export async function generateMonthlyBillForProperty(billData) {
       previousBalance: 0,
       lastMonthStatus: lastMonthStatus
     });
-    console.log('10. AI bill data:', aiBillData);
+
+    console.log('12. AI bill data:', aiBillData);
 
     // Ensure we have a valid total
     if (!aiBillData.total || aiBillData.total <= 0) {
       throw new Error('Invalid bill total calculated by AI');
     }
 
-    // Create bill document with all required fields
+    // Create bill document using tenant email for querying
     const billDoc = {
       propertyId: property.id,
       landlordId: landlordId,
-      tenantId: property.tenantId,
+      tenantEmail: property.tenantEmail, 
       tenantName: property.tenant,
+      tenantPhone: property.tenantPhone || '',
       flatNumber: property.flatNumber,
       month: month,
-      total: aiBillData.total, // Ensure total is present
+      total: aiBillData.total,
       ...aiBillData,
       waterUsage: waterUsage || 0,
       electricityUsage: electricityUsage || 0,
@@ -149,28 +157,29 @@ export async function generateMonthlyBillForProperty(billData) {
       createdAt: serverTimestamp()
     };
 
-    console.log('11. Bill document to create:', {
+    console.log('13. Bill document to create:', {
       ...billDoc,
       generatedAt: 'serverTimestamp()',
       createdAt: 'serverTimestamp()'
     });
 
-    console.log('12. Attempting to write to Firestore...');
+    console.log('14. Attempting to write to Firestore...');
     const docRef = await addDoc(collection(db, 'bills'), billDoc);
-    console.log('13. ✓ Bill created successfully with ID:', docRef.id);
+    console.log('15. ✅ Bill created successfully with ID:', docRef.id);
 
-    return { 
-      id: docRef.id, 
+    return {
+      id: docRef.id,
       ...billDoc,
       generatedAt: new Date().toISOString()
     };
+
   } catch (error) {
     console.error('=== BILL GENERATION ERROR ===');
     console.error('Error object:', error);
     console.error('Error code:', error.code);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
-    
+
     if (error.code === 'permission-denied') {
       console.error('PERMISSION DENIED - Check these things:');
       console.error('1. Is the user logged in?');
@@ -187,19 +196,17 @@ export async function generateMonthlyBillForProperty(billData) {
   }
 }
 
-
-
-// Get tenant bills (fallback for non-subscription)
-export async function getTenantBills(tenantId) {
-  if (!tenantId) {
-    console.error('getTenantBills: tenantId is undefined or null');
+// Get tenant bills (fallback for non-subscription) - using email
+export async function getTenantBills(userEmail) {
+  if (!userEmail) {
+    console.error('getTenantBills: userEmail is undefined or null');
     return [];
   }
 
   try {
     const q = query(
       collection(db, 'bills'),
-      where('tenantId', '==', tenantId)
+      where('tenantEmail', '==', userEmail)
     );
     const snapshot = await getDocs(q);
     const bills = snapshot.docs.map(doc => ({
@@ -238,7 +245,6 @@ export async function downloadBill(billId) {
     if (!billDoc.exists()) {
       throw new Error('Bill not found');
     }
-    
     return {
       id: billId,
       ...billDoc.data()
@@ -257,19 +263,18 @@ export async function getLandlordBillingStats(landlordId) {
       where('landlordId', '==', landlordId)
     );
     const snapshot = await getDocs(q);
-    
+
     let totalRevenue = 0;
     let collected = 0;
     let pending = 0;
     let overdue = 0;
-
     const now = new Date();
 
     snapshot.docs.forEach(doc => {
       const bill = doc.data();
       const total = bill.total || 0;
       totalRevenue += total;
-      
+
       if (bill.status === 'paid') {
         collected += total;
       } else {
@@ -309,9 +314,8 @@ export async function markOverdueBills() {
       collection(db, 'bills'),
       where('status', '==', 'pending')
     );
-    
     const snapshot = await getDocs(overdueQuery);
-    
+
     for (const billDoc of snapshot.docs) {
       const bill = billDoc.data();
       if (bill.dueDate && bill.dueDate < now) {

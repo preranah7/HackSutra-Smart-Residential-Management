@@ -5,7 +5,6 @@ const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 export async function generateBillWithAI(rentalData) {
   try {
-    // Updated model name
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
@@ -53,11 +52,10 @@ Return ONLY a valid JSON object (no markdown, no extra text):
     const response = await result.response;
     const text = response.text();
 
-    // Clean and parse response
     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
     const billData = JSON.parse(cleanText);
 
-    // Validate the response
+
     if (!billData.total || typeof billData.total !== 'number') {
       throw new Error('Invalid AI response');
     }
@@ -101,47 +99,3 @@ Return ONLY a valid JSON object (no markdown, no extra text):
   }
 }
 
-export async function categorizeComplaint(complaintData) {
-  try {
-    // Updated model name
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    const prompt = `
-You are a maintenance categorization assistant. Analyze this complaint:
-
-Description: ${complaintData.description}
-Location: ${complaintData.location || 'Not specified'}
-
-Categorize and prioritize this complaint:
-
-Categories: plumbing, electrical, carpentry, cleaning, lift, painting, security, other
-Priority: low, medium, high, emergency
-
-Rules for Priority:
-- emergency: Safety risk, no water/electricity, lift stuck with people
-- high: Major inconvenience, affects daily living
-- medium: Needs attention but not urgent
-- low: Minor cosmetic or non-essential
-
-Return ONLY a JSON object (no markdown):
-{
-  "category": "exact category from list",
-  "priority": "exact priority from list",
-  "estimatedTime": "time to fix (e.g., '2 hours', '1 day')",
-  "suggestedAction": "brief action needed",
-  "assignTo": "type of worker needed (e.g., 'plumber', 'electrician')"
-}`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    const analysis = JSON.parse(cleanText);
-
-    return analysis;
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    throw new Error('Failed to analyze complaint with AI');
-  }
-}

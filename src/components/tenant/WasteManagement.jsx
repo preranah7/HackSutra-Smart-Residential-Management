@@ -5,7 +5,6 @@ import {
   Trash2, 
   Calendar, 
   CheckCircle, 
-  AlertCircle,
   TrendingUp,
   Award,
   Leaf,
@@ -49,13 +48,11 @@ function WasteManagement() {
       setUserScore(scoreData);
       setLeaderboard(leaderboardData);
       
-      // Check today's collection - Fixed weekday format
       const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
       const todaySchedule = scheduleData.find(s => s.day === today);
       setTodayCollection(todaySchedule);
     } catch (error) {
       console.error('Error loading waste data:', error);
-      // Set default data on error
       setSchedule([
         { day: 'monday', types: ['wet'], time: '7:00 AM - 9:00 AM' },
         { day: 'tuesday', types: ['dry'], time: '7:00 AM - 9:00 AM' },
@@ -91,7 +88,6 @@ function WasteManagement() {
     { 
       type: 'wet', 
       label: 'Wet Waste', 
-      color: 'green',
       icon: '🍎',
       description: 'Food scraps, vegetable peels, expired food',
       tips: 'Keep in closed container, dispose daily'
@@ -99,7 +95,6 @@ function WasteManagement() {
     { 
       type: 'dry', 
       label: 'Dry Waste', 
-      color: 'blue',
       icon: '📄',
       description: 'Paper, plastic, metal, glass',
       tips: 'Clean and dry before disposal'
@@ -107,7 +102,6 @@ function WasteManagement() {
     { 
       type: 'e_waste', 
       label: 'E-Waste', 
-      color: 'red',
       icon: '📱',
       description: 'Old electronics, batteries, bulbs',
       tips: 'Collect and dispose monthly'
@@ -115,7 +109,6 @@ function WasteManagement() {
     { 
       type: 'bulk', 
       label: 'Bulk Waste', 
-      color: 'orange',
       icon: '🪑',
       description: 'Furniture, large items',
       tips: 'Schedule pickup in advance'
@@ -130,8 +123,8 @@ function WasteManagement() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Waste Management</h1>
-        <p className="text-gray-600">Smart waste segregation for a cleaner society</p>
+        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Waste Management</h1>
+        <p className="text-sm text-gray-600">Smart waste segregation for a cleaner society</p>
       </div>
 
       {alert.show && (
@@ -144,29 +137,29 @@ function WasteManagement() {
 
       {/* Today's Collection Banner */}
       {todayCollection && todayCollection.types && todayCollection.types.length > 0 && (
-        <div className="bg-gradient-to-br from-green-500 to-green-700 rounded-2xl shadow-xl p-8 text-white">
+        <div className="bg-green-500 rounded-lg shadow-sm border border-green-600 p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center space-x-2 mb-2">
-                <Calendar className="w-5 h-5" />
-                <span className="text-sm font-medium text-green-100">Today's Collection</span>
+                <Calendar className="w-4 h-4" />
+                <span className="text-sm font-medium text-emerald-100">Today's Collection</span>
               </div>
-              <h2 className="text-3xl font-bold mb-2">
+              <h2 className="text-2xl font-semibold mb-1">
                 {todayCollection.types.map(t => 
                   wasteTypes.find(wt => wt.type === t)?.icon
                 ).join(' ')} {todayCollection.types.map(t => 
                   wasteTypes.find(wt => wt.type === t)?.label
                 ).join(' & ')}
               </h2>
-              <p className="text-green-100">Collection Time: {todayCollection.time}</p>
+              <p className="text-sm text-emerald-100">Collection Time: {todayCollection.time}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl">
-              <Trash2 className="w-12 h-12" />
+            <div className="bg-emerald-700 p-3 rounded-lg">
+              <Trash2 className="w-10 h-10" />
             </div>
           </div>
           <button
             onClick={() => handleConfirmCollection(todayCollection.types[0])}
-            className="mt-4 bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"
+            className="mt-4 bg-white text-emerald-700 px-5 py-2 rounded-lg font-medium text-sm hover:bg-emerald-50 transition-colors"
           >
             ✓ I've Put Out My Waste
           </button>
@@ -174,57 +167,57 @@ function WasteManagement() {
       )}
 
       {/* User Score Card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="card bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100">
-          <div className="flex items-center justify-between mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-sm text-purple-600 mb-1">Your Eco Score</p>
-              <p className="text-4xl font-bold text-purple-700">
+              <p className="text-xs text-gray-600 mb-1">Your Eco Score</p>
+              <p className="text-3xl font-semibold text-purple-600">
                 {userScore?.score || 0}
               </p>
             </div>
-            <div className="bg-purple-100 p-3 rounded-xl">
-              <Award className="w-8 h-8 text-purple-600" />
+            <div className="bg-purple-50 p-2.5 rounded-lg">
+              <Award className="w-6 h-6 text-purple-600" />
             </div>
           </div>
-          <div className="flex items-center text-sm text-purple-600">
-            <TrendingUp className="w-4 h-4 mr-2" />
+          <div className="flex items-center text-xs text-purple-600">
+            <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
             <span>Rank #{userScore?.rank || '-'} in society</span>
           </div>
         </div>
 
-        <div className="card">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Compliance Rate</p>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-xs text-gray-600 mb-1">Compliance Rate</p>
+              <p className="text-2xl font-semibold text-gray-900">
                 {userScore?.complianceRate || 95}%
               </p>
             </div>
-            <div className="bg-green-100 p-3 rounded-xl">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="bg-emerald-50 p-2.5 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-emerald-600" />
             </div>
           </div>
         </div>
 
-        <div className="card">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">CO₂ Saved</p>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-xs text-gray-600 mb-1">CO₂ Saved</p>
+              <p className="text-2xl font-semibold text-gray-900">
                 {userScore?.co2Saved || 12}kg
               </p>
             </div>
-            <div className="bg-blue-100 p-3 rounded-xl">
-              <Leaf className="w-6 h-6 text-blue-600" />
+            <div className="bg-blue-50 p-2.5 rounded-lg">
+              <Leaf className="w-5 h-5 text-blue-600" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Weekly Schedule */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekly Collection Schedule</h3>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 className="text-base font-semibold text-gray-900 mb-4">Weekly Collection Schedule</h3>
         <div className="space-y-2">
           {schedule.map((day, index) => {
             const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
@@ -234,22 +227,22 @@ function WasteManagement() {
                 key={index}
                 className={`flex items-center justify-between p-4 rounded-lg transition-all ${
                   isToday 
-                    ? 'bg-green-50 border-2 border-green-200' 
+                    ? 'bg-emerald-50 border border-emerald-200' 
                     : 'bg-gray-50 hover:bg-gray-100'
                 }`}
               >
-                <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    isToday ? 'bg-green-100' : 'bg-white'
+                <div className="flex items-center space-x-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    isToday ? 'bg-emerald-100' : 'bg-white border border-gray-200'
                   }`}>
-                    <Calendar className={`w-6 h-6 ${isToday ? 'text-green-600' : 'text-gray-600'}`} />
+                    <Calendar className={`w-5 h-5 ${isToday ? 'text-emerald-600' : 'text-gray-600'}`} />
                   </div>
                   <div>
-                    <p className={`font-semibold ${isToday ? 'text-green-700' : 'text-gray-900'}`}>
+                    <p className={`font-medium text-sm ${isToday ? 'text-emerald-700' : 'text-gray-900'}`}>
                       {day.day.charAt(0).toUpperCase() + day.day.slice(1)}
-                      {isToday && <span className="ml-2 text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full">Today</span>}
+                      {isToday && <span className="ml-2 text-xs bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">Today</span>}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-gray-600">
                       {day.types && day.types.length > 0 ? day.types.map(t => wasteTypes.find(wt => wt.type === t)?.label).join(', ') : 'No Collection'}
                     </p>
                   </div>
@@ -258,7 +251,7 @@ function WasteManagement() {
                   <p className="text-sm font-medium text-gray-900">{day.time}</p>
                   <div className="flex items-center space-x-1 mt-1">
                     {day.types && day.types.map(t => (
-                      <span key={t} className="text-xl">
+                      <span key={t} className="text-lg">
                         {wasteTypes.find(wt => wt.type === t)?.icon}
                       </span>
                     ))}
@@ -271,19 +264,19 @@ function WasteManagement() {
       </div>
 
       {/* Waste Segregation Guide */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <Info className="w-5 h-5 mr-2 text-blue-600" />
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center">
+          <Info className="w-4 h-4 mr-2 text-blue-600" />
           Waste Segregation Guide
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {wasteTypes.map((waste) => (
             <div key={waste.type} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
               <div className="flex items-start space-x-3">
-                <div className={`text-3xl`}>{waste.icon}</div>
+                <div className="text-2xl">{waste.icon}</div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 mb-1">{waste.label}</h4>
-                  <p className="text-sm text-gray-600 mb-2">{waste.description}</p>
+                  <h4 className="font-medium text-gray-900 text-sm mb-1">{waste.label}</h4>
+                  <p className="text-xs text-gray-600 mb-1.5">{waste.description}</p>
                   <p className="text-xs text-gray-500 italic">💡 {waste.tips}</p>
                 </div>
               </div>
@@ -293,9 +286,9 @@ function WasteManagement() {
       </div>
 
       {/* Leaderboard */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <Award className="w-5 h-5 mr-2 text-yellow-600" />
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center">
+          <Award className="w-4 h-4 mr-2 text-amber-600" />
           Eco Warriors Leaderboard
         </h3>
         {leaderboard.length > 0 ? (
@@ -303,15 +296,15 @@ function WasteManagement() {
             {leaderboard.slice(0, 10).map((user, index) => (
               <div 
                 key={user.id}
-                className={`flex items-center justify-between p-4 rounded-lg ${
+                className={`flex items-center justify-between p-3 rounded-lg ${
                   user.id === userProfile.uid 
-                    ? 'bg-purple-50 border-2 border-purple-200' 
+                    ? 'bg-purple-50 border border-purple-200' 
                     : 'bg-gray-50'
                 }`}
               >
-                <div className="flex items-center space-x-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                    index === 0 ? 'bg-yellow-500' :
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs text-white ${
+                    index === 0 ? 'bg-amber-500' :
                     index === 1 ? 'bg-gray-400' :
                     index === 2 ? 'bg-orange-600' :
                     'bg-gray-300'
@@ -319,17 +312,17 @@ function WasteManagement() {
                     {index + 1}
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-medium text-gray-900 text-sm">
                       {user.name}
                       {user.id === userProfile.uid && 
-                        <span className="ml-2 text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">You</span>
+                        <span className="ml-2 text-xs bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full">You</span>
                       }
                     </p>
-                    <p className="text-sm text-gray-600">Flat {user.flatNumber}</p>
+                    <p className="text-xs text-gray-600">Flat {user.flatNumber}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold text-gray-900">{user.score}</p>
+                  <p className="text-lg font-semibold text-gray-900">{user.score}</p>
                   <p className="text-xs text-gray-500">points</p>
                 </div>
               </div>
@@ -338,33 +331,33 @@ function WasteManagement() {
         ) : (
           <div className="text-center py-8">
             <Award className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-600">No leaderboard data yet</p>
+            <p className="text-gray-600 text-sm">No leaderboard data yet</p>
           </div>
         )}
       </div>
 
       {/* Environmental Impact */}
-      <div className="card bg-gradient-to-br from-green-50 to-blue-50 border border-green-100">
+      <div className="bg-white rounded-lg shadow-sm border border-emerald-200 p-5">
         <div className="flex items-start space-x-4">
-          <div className="bg-green-100 p-3 rounded-xl">
-            <Recycle className="w-8 h-8 text-green-600" />
+          <div className="bg-emerald-50 p-2.5 rounded-lg">
+            <Recycle className="w-6 h-6 text-emerald-600" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-base font-semibold text-gray-900 mb-3">
               Our Society's Impact This Month
             </h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-2xl font-bold text-green-700">2.4T</p>
-                <p className="text-sm text-gray-600">Waste Segregated</p>
+                <p className="text-xl font-semibold text-emerald-700">2.4T</p>
+                <p className="text-xs text-gray-600">Waste Segregated</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-blue-700">450kg</p>
-                <p className="text-sm text-gray-600">Recycled</p>
+                <p className="text-xl font-semibold text-blue-700">450kg</p>
+                <p className="text-xs text-gray-600">Recycled</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-purple-700">1.2T</p>
-                <p className="text-sm text-gray-600">CO₂ Reduced</p>
+                <p className="text-xl font-semibold text-purple-700">1.2T</p>
+                <p className="text-xs text-gray-600">CO₂ Reduced</p>
               </div>
             </div>
           </div>

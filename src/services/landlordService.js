@@ -64,14 +64,12 @@ export async function addProperty(propertyData) {
     const property = {
       ...propertyData,
       status: 'vacant',
-      tenantId: null,
       tenant: null,
       tenantEmail: null,
       tenantPhone: null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
-
     const docRef = await addDoc(collection(db, 'properties'), property);
     console.log('Property added successfully:', docRef.id);
     return docRef.id;
@@ -85,7 +83,6 @@ export async function addProperty(propertyData) {
 export async function updateProperty(propertyId, propertyData) {
   try {
     const propertyRef = doc(db, 'properties', propertyId);
-    
     // Get current property data to preserve tenant info if it exists
     const propertyDoc = await getDoc(propertyRef);
     const currentData = propertyDoc.data();
@@ -96,10 +93,8 @@ export async function updateProperty(propertyId, propertyData) {
       updatedAt: serverTimestamp()
     };
 
-    // Don't override tenant info and status during property edit
     if (currentData.tenant) {
       updateData.tenant = currentData.tenant;
-      updateData.tenantId = currentData.tenantId;
       updateData.tenantEmail = currentData.tenantEmail;
       updateData.tenantPhone = currentData.tenantPhone;
       updateData.leaseStartDate = currentData.leaseStartDate;
@@ -131,11 +126,14 @@ export async function deleteProperty(propertyId) {
 // Assign tenant to property
 export async function assignTenant(propertyId, tenantData) {
   try {
+    console.log('=== ASSIGN TENANT DEBUG ===');
+    console.log('1. Property ID:', propertyId);
+    console.log('2. Tenant Data:', tenantData);
+
     const propertyRef = doc(db, 'properties', propertyId);
     
     // Update property with tenant information
     await updateDoc(propertyRef, {
-      tenantId: null, // Set to null since we don't have Firebase user ID
       tenant: tenantData.tenantName,
       tenantEmail: tenantData.tenantEmail,
       tenantPhone: tenantData.tenantPhone,
@@ -146,7 +144,7 @@ export async function assignTenant(propertyId, tenantData) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('Tenant assigned successfully to property:', propertyId);
+    console.log('3. ✅ Tenant assigned successfully to property:', propertyId);
     return true;
   } catch (error) {
     console.error('Error assigning tenant:', error);
@@ -161,7 +159,6 @@ export async function removeTenant(propertyId) {
     
     // Remove tenant information and update status
     await updateDoc(propertyRef, {
-      tenantId: null,
       tenant: null,
       tenantEmail: null,
       tenantPhone: null,
@@ -180,12 +177,12 @@ export async function removeTenant(propertyId) {
   }
 }
 
-// Get tenant's property
-export async function getTenantProperty(tenantId) {
+// Get tenant's property - using email
+export async function getTenantProperty(tenantEmail) {
   try {
     const propertiesQuery = query(
       collection(db, 'properties'),
-      where('tenantId', '==', tenantId)
+      where('tenantEmail', '==', tenantEmail)
     );
     const snapshot = await getDocs(propertiesQuery);
     
@@ -208,21 +205,24 @@ export async function getTenantProperty(tenantId) {
 export async function getLandlordStats(landlordId) {
   try {
     const properties = await getLandlordProperties(landlordId);
-    
     const totalProperties = properties.length;
-    const occupiedProperties = properties.filter(p => p.status === 'occupied' || p.tenant).length;
+    
+    // Check multiple conditions for occupied status
+    const occupiedProperties = properties.filter(p => 
+      p.status === 'occupied' || p.tenant || p.tenantEmail
+    ).length;
     const vacantProperties = totalProperties - occupiedProperties;
     const activeTenants = occupiedProperties;
-    
+
     // Calculate revenue
     const totalRevenue = properties.reduce((sum, p) => {
-      if (p.status === 'occupied' || p.tenant) {
+      if (p.status === 'occupied' || p.tenant || p.tenantEmail) {
         return sum + (p.monthlyRent || 0);
       }
       return sum;
     }, 0);
 
-    // Get bills for collection rate (you can implement this based on your bills collection)
+    // Get bills for collection rate (implement this based on your bills collection)
     const collectionRate = 85; // Placeholder - implement actual calculation
     const pendingBills = 3; // Placeholder
     const pendingAmount = 45000; // Placeholder
@@ -264,7 +264,6 @@ export async function getPropertyById(propertyId) {
         ...propertyDoc.data()
       };
     }
-    
     return null;
   } catch (error) {
     console.error('Error fetching property:', error);

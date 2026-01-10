@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Car, Clock, Calendar, User, Phone, MapPin, X, AlertCircle } from 'lucide-react';
+import { Car, Clock, Calendar, User, Phone, X } from 'lucide-react';
 import {
   subscribeToParkingSlots,
   subscribeToUserBookings,
@@ -18,12 +18,8 @@ export default function ParkingManagement() {
   
   const [activeTab, setActiveTab] = useState('book');
   const [alert, setAlert] = useState(null);
-  
-  // Real-time parking data
   const [parkingSlots, setParkingSlots] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
-  
-  // Booking form state
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingForm, setBookingForm] = useState({
@@ -36,13 +32,11 @@ export default function ParkingManagement() {
     purpose: ''
   });
 
-  // Subscribe to real-time updates
   useEffect(() => {
     const unsubSlots = subscribeToParkingSlots((slots) => {
       setParkingSlots(slots);
     });
 
-    // Only subscribe to bookings if user is available
     let unsubBookings = () => {};
     if (activeUser?.uid) {
       unsubBookings = subscribeToUserBookings(activeUser.uid, (bookings) => {
@@ -56,7 +50,6 @@ export default function ParkingManagement() {
     };
   }, [activeUser?.uid]);
 
-  // Get available visitor slots for selection
   const availableVisitorSlots = parkingSlots.filter(
     slot => slot.type === 'visitor' && slot.status === 'available'
   );
@@ -149,14 +142,13 @@ export default function ParkingManagement() {
     }
   };
 
-  // Don't show authentication error immediately, user might still be loading
   if (!activeUser?.uid) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading parking information...</p>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 text-sm">Loading parking information...</p>
           </div>
         </div>
       </div>
@@ -167,7 +159,7 @@ export default function ParkingManagement() {
   const visitorSlots = parkingSlots.filter(s => s.type === 'visitor');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+    <div className="space-y-6">
       {alert && (
         <Alert
           type={alert.type}
@@ -176,245 +168,244 @@ export default function ParkingManagement() {
         />
       )}
 
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">Parking Management</h1>
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Parking Management</h1>
+        <p className="text-sm text-gray-600">Manage visitor parking and view availability</p>
+      </div>
 
-        {/* Rest of your JSX remains the same... */}
-        {/* I'll include just the modal form update for the submit button */}
+      {/* Tabs */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setActiveTab('book')}
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+            activeTab === 'book'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+          }`}
+        >
+          Book Visitor Parking
+        </button>
+        <button
+          onClick={() => setActiveTab('bookings')}
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+            activeTab === 'bookings'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+          }`}
+        >
+          My Bookings ({myBookings.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('layout')}
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+            activeTab === 'layout'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+          }`}
+        >
+          View Full Layout
+        </button>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8">
-          <button
-            onClick={() => setActiveTab('book')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'book'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            Book Visitor Parking
-          </button>
-          <button
-            onClick={() => setActiveTab('bookings')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'bookings'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            My Bookings ({myBookings.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('layout')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'layout'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            View Full Layout
-          </button>
-        </div>
-
-        {/* Book Visitor Parking Tab */}
-        {activeTab === 'book' && (
-          <div>
-            {/* Legend */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h3 className="font-bold text-gray-800 mb-4">Slot Status Legend</h3>
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-500 rounded"></div>
-                  <span className="text-sm text-gray-700">Available - Click to book</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-red-500 rounded"></div>
-                  <span className="text-sm text-gray-700">Occupied - Cannot book</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-yellow-500 rounded"></div>
-                  <span className="text-sm text-gray-700">Reserved - Cannot book</span>
-                </div>
+      {/* Book Visitor Parking Tab */}
+      {activeTab === 'book' && (
+        <div>
+          {/* Legend */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 mb-4">
+            <h3 className="font-semibold text-gray-900 text-sm mb-3">Slot Status Legend</h3>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-emerald-500 rounded"></div>
+                <span className="text-gray-700">Available - Click to book</span>
               </div>
-            </div>
-
-            {/* Real-time Parking Layout for Visitor Slots */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Available Visitor Parking Slots (Click to Book)
-              </h2>
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
-                {visitorSlots.map(slot => (
-                  <button
-                    key={slot.id}
-                    onClick={() => handleSlotSelect(slot)}
-                    disabled={slot.status !== 'available'}
-                    className={`p-4 rounded-lg font-bold text-sm transition-all ${
-                      slot.status === 'available'
-                        ? 'bg-green-500 text-white hover:bg-green-600 hover:scale-105 cursor-pointer shadow-lg'
-                        : slot.status === 'reserved'
-                        ? 'bg-yellow-500 text-white cursor-not-allowed opacity-60'
-                        : 'bg-red-500 text-white cursor-not-allowed opacity-60'
-                    }`}
-                  >
-                    <div className="text-center">
-                      <Car className="w-5 h-5 mx-auto mb-1" />
-                      <div>{slot.slotNumber}</div>
-                    </div>
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-500 rounded"></div>
+                <span className="text-gray-700">Occupied - Cannot book</span>
               </div>
-              {availableVisitorSlots.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  No visitor parking slots available at the moment.
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-amber-500 rounded"></div>
+                <span className="text-gray-700">Reserved - Cannot book</span>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* My Bookings Tab */}
-        {activeTab === 'bookings' && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">My Parking Bookings</h2>
-            {myBookings.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                <Car className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-500">No bookings yet</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {myBookings.map(booking => (
-                  <div key={booking.id} className="bg-white rounded-xl shadow-lg p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-800">
-                          Slot {booking.slotNumber}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {formatRelativeTime(booking.createdAt)}
-                        </p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        booking.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {booking.status}
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 text-sm mb-4">
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <User className="w-4 h-4" />
-                        <span>{booking.visitorName}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Phone className="w-4 h-4" />
-                        <span>{booking.visitorPhone}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Car className="w-4 h-4" />
-                        <span>{booking.vehicleNumber}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Calendar className="w-4 h-4" />
-                        <span>{booking.date}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Clock className="w-4 h-4" />
-                        <span>{booking.startTime} - {booking.endTime}</span>
-                      </div>
-                    </div>
-
-                    {booking.status === 'active' && (
-                      <button
-                        onClick={() => handleCancelBooking(booking.id)}
-                        className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
-                      >
-                        Cancel Booking
-                      </button>
-                    )}
+          {/* Visitor Parking Slots */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h2 className="text-base font-semibold text-gray-900 mb-4">
+              Available Visitor Parking Slots (Click to Book)
+            </h2>
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+              {visitorSlots.map(slot => (
+                <button
+                  key={slot.id}
+                  onClick={() => handleSlotSelect(slot)}
+                  disabled={slot.status !== 'available'}
+                  className={`p-3 rounded-lg font-semibold text-xs transition-all ${
+                    slot.status === 'available'
+                      ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-300 hover:scale-105 cursor-pointer shadow-sm'
+                      : slot.status === 'reserved'
+                      ? 'bg-amber-200 text-amber-700 cursor-not-allowed opacity-60'
+                      : 'bg-red-500 text-white cursor-not-allowed opacity-60'
+                  }`}
+                >
+                  <div className="text-center">
+                    <Car className="w-4 h-4 mx-auto mb-1" />
+                    <div>{slot.slotNumber}</div>
                   </div>
-                ))}
+                </button>
+              ))}
+            </div>
+            {availableVisitorSlots.length === 0 && (
+              <div className="text-center py-8 text-gray-500 text-sm">
+                No visitor parking slots available at the moment.
               </div>
             )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Full Layout Tab */}
-        {activeTab === 'layout' && (
-          <div>
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Complete Parking Layout</h2>
-              
-              {/* Resident Slots */}
-              <div className="mb-8">
-                <h3 className="text-lg font-bold text-gray-700 mb-4">Resident Parking (Ground Floor)</h3>
-                <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
-                  {residentSlots.filter(s => s.level === 'Ground').map(slot => (
-                    <div
-                      key={slot.id}
-                      className={`p-3 rounded-lg text-center text-xs font-medium ${
-                        slot.status === 'available' ? 'bg-green-100 text-green-700' :
-                        slot.status === 'reserved' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {slot.slotNumber}
+      {/* My Bookings Tab */}
+      {activeTab === 'bookings' && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">My Parking Bookings</h2>
+          {myBookings.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <Car className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <p className="text-gray-500 text-sm">No bookings yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {myBookings.map(booking => (
+                <div key={booking.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-base font-semibold text-gray-900">
+                        Slot {booking.slotNumber}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        {formatRelativeTime(booking.createdAt)}
+                      </p>
                     </div>
-                  ))}
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                      booking.status === 'active'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}>
+                      {booking.status}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs mb-4">
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <User className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{booking.visitorName}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{booking.visitorPhone}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Car className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{booking.vehicleNumber}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{booking.date}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{booking.startTime} - {booking.endTime}</span>
+                    </div>
+                  </div>
+
+                  {booking.status === 'active' && (
+                    <button
+                      onClick={() => handleCancelBooking(booking.id)}
+                      className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium text-sm"
+                    >
+                      Cancel Booking
+                    </button>
+                  )}
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Full Layout Tab */}
+      {activeTab === 'layout' && (
+        <div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <h2 className="text-base font-semibold text-gray-900 mb-5">Complete Parking Layout</h2>
+            
+            {/* Resident Slots - Ground Floor */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Resident Parking (Ground Floor)</h3>
+              <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
+                {residentSlots.filter(s => s.level === 'Ground').map(slot => (
+                  <div
+                    key={slot.id}
+                    className={`p-2.5 rounded-lg text-center text-xs font-medium ${
+                      slot.status === 'available' ? 'bg-emerald-100 text-emerald-700' :
+                      slot.status === 'reserved' ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {slot.slotNumber}
+                  </div>
+                ))}
               </div>
+            </div>
 
-              {/* First Floor */}
-              <div className="mb-8">
-                <h3 className="text-lg font-bold text-gray-700 mb-4">Resident Parking (First Floor)</h3>
-                <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
-                  {residentSlots.filter(s => s.level === 'First').map(slot => (
-                    <div
-                      key={slot.id}
-                      className={`p-3 rounded-lg text-center text-xs font-medium ${
-                        slot.status === 'available' ? 'bg-green-100 text-green-700' :
-                        slot.status === 'reserved' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {slot.slotNumber}
-                    </div>
-                  ))}
-                </div>
+            {/* First Floor */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Resident Parking (First Floor)</h3>
+              <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
+                {residentSlots.filter(s => s.level === 'First').map(slot => (
+                  <div
+                    key={slot.id}
+                    className={`p-2.5 rounded-lg text-center text-xs font-medium ${
+                      slot.status === 'available' ? 'bg-emerald-100 text-emerald-700' :
+                      slot.status === 'reserved' ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {slot.slotNumber}
+                  </div>
+                ))}
               </div>
+            </div>
 
-              {/* Visitor Slots */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-700 mb-4">Visitor Parking</h3>
-                <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
-                  {visitorSlots.map(slot => (
-                    <div
-                      key={slot.id}
-                      className={`p-3 rounded-lg text-center text-xs font-medium ${
-                        slot.status === 'available' ? 'bg-green-100 text-green-700' :
-                        slot.status === 'reserved' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {slot.slotNumber}
-                    </div>
-                  ))}
-                </div>
+            {/* Visitor Slots */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Visitor Parking</h3>
+              <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
+                {visitorSlots.map(slot => (
+                  <div
+                    key={slot.id}
+                    className={`p-2.5 rounded-lg text-center text-xs font-medium ${
+                      slot.status === 'available' ? 'bg-emerald-100 text-emerald-700' :
+                      slot.status === 'reserved' ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {slot.slotNumber}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Booking Modal */}
       {showBookingModal && selectedSlot && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-800">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-xl font-semibold text-gray-900">
                 Book Slot {selectedSlot.slotNumber}
               </h3>
               <button
@@ -422,15 +413,15 @@ export default function ParkingManagement() {
                   setShowBookingModal(false);
                   setSelectedSlot(null);
                 }}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-400 hover:text-gray-600"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleBookingSubmit} className="space-y-4">
+            <form onSubmit={handleBookingSubmit} className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Visitor Name *
                 </label>
                 <input
@@ -438,13 +429,13 @@ export default function ParkingManagement() {
                   required
                   value={bookingForm.visitorName}
                   onChange={(e) => setBookingForm({...bookingForm, visitorName: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   placeholder="Enter visitor's name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Visitor Phone *
                 </label>
                 <input
@@ -452,13 +443,13 @@ export default function ParkingManagement() {
                   required
                   value={bookingForm.visitorPhone}
                   onChange={(e) => setBookingForm({...bookingForm, visitorPhone: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   placeholder="Enter phone number"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Vehicle Number *
                 </label>
                 <input
@@ -466,13 +457,13 @@ export default function ParkingManagement() {
                   required
                   value={bookingForm.vehicleNumber}
                   onChange={(e) => setBookingForm({...bookingForm, vehicleNumber: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   placeholder="MH 12 AB 1234"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Date *
                 </label>
                 <input
@@ -481,13 +472,13 @@ export default function ParkingManagement() {
                   min={new Date().toISOString().split('T')[0]}
                   value={bookingForm.date}
                   onChange={(e) => setBookingForm({...bookingForm, date: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Start Time *
                   </label>
                   <input
@@ -495,11 +486,11 @@ export default function ParkingManagement() {
                     required
                     value={bookingForm.startTime}
                     onChange={(e) => setBookingForm({...bookingForm, startTime: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     End Time *
                   </label>
                   <input
@@ -507,19 +498,19 @@ export default function ParkingManagement() {
                     required
                     value={bookingForm.endTime}
                     onChange={(e) => setBookingForm({...bookingForm, endTime: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Purpose (Optional)
                 </label>
                 <textarea
                   value={bookingForm.purpose}
                   onChange={(e) => setBookingForm({...bookingForm, purpose: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   placeholder="Reason for visit..."
                   rows="2"
                 />
@@ -527,7 +518,7 @@ export default function ParkingManagement() {
 
               <button
                 type="submit"
-                className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all"
+                className="w-full px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-sm transition-colors"
               >
                 Confirm Booking
               </button>

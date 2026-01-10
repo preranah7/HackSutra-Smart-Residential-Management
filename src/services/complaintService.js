@@ -5,7 +5,6 @@ import {
   updateDoc, getDoc, onSnapshot, serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { categorizeComplaint } from './geminiService';
 
 // Real-time complaints subscription for user
 export function subscribeToUserComplaints(userId, callback) {
@@ -59,31 +58,36 @@ export function subscribeToAllComplaints(callback) {
   );
 }
 
-// Create a new complaint with AI categorization
+
 export async function createComplaint(complaintData) {
   try {
-    // Use AI to categorize and prioritize
-    let aiAnalysis;
-    try {
-      aiAnalysis = await categorizeComplaint(complaintData);
-    } catch (error) {
-      console.error('AI categorization failed, using defaults:', error);
-      aiAnalysis = {
-        category: complaintData.category,
-        priority: 'medium',
-        estimatedTime: '2-3 days',
-        suggestedAction: 'Will be reviewed by maintenance team',
-        assignTo: 'maintenance'
-      };
-    }
+    // Determine estimated time based on priority
+    const estimatedTimeMap = {
+      'emergency': '2-4 hours',
+      'high': '1 day',
+      'medium': '2-3 days',
+      'low': '1 week'
+    };
 
-    // Create complaint document
+    // Determine assignTo based on category
+    const assignToMap = {
+      'Plumbing': 'plumber',
+      'Electrical': 'electrician',
+      'Maintenance': 'maintenance',
+      'Cleaning': 'cleaning staff',
+      'Security': 'security',
+      'Parking': 'maintenance',
+      'Noise': 'security',
+      'Other': 'maintenance'
+    };
+
+    // Create complaint document with default values
     const complaint = {
       ...complaintData,
-      priority: aiAnalysis.priority,
-      estimatedTime: aiAnalysis.estimatedTime,
-      suggestedAction: aiAnalysis.suggestedAction,
-      assignTo: aiAnalysis.assignTo,
+      priority: complaintData.priority || 'medium',
+      estimatedTime: estimatedTimeMap[complaintData.priority] || '2-3 days',
+      suggestedAction: 'Will be reviewed by maintenance team',
+      assignTo: assignToMap[complaintData.category] || 'maintenance',
       status: 'open',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()

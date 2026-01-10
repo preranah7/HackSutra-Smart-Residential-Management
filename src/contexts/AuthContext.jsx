@@ -82,7 +82,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
-    user: currentUser, // Add this alias
+    user: currentUser,
     userProfile,
     loading,
     signup,
