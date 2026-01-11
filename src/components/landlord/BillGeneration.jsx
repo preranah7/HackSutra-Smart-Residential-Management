@@ -162,7 +162,7 @@ export default function BillGeneration() {
   const selectedPropertyData = properties.find(p => p.id === selectedProperty);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-full">
       {alert && (
         <Alert
           type={alert.type}
@@ -171,15 +171,15 @@ export default function BillGeneration() {
         />
       )}
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-5">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-5 gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-50 rounded-lg">
-              <Receipt className="w-6 h-6 text-indigo-600" />
+            <div className="p-2 sm:p-2.5 bg-indigo-50 rounded-lg flex-shrink-0">
+              <Receipt className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
             </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Bill Generation</h1>
-              <p className="text-sm text-gray-600">Generate accurate bills using AI</p>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 truncate">Bill Generation</h1>
+              <p className="text-xs sm:text-sm text-gray-600">Generate accurate bills using AI</p>
             </div>
           </div>
 
@@ -187,20 +187,20 @@ export default function BillGeneration() {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm disabled:opacity-50"
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm disabled:opacity-50 w-full sm:w-auto"
             title="Refresh properties list"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Refreshing...' : 'Refresh'}
+            <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
         </div>
 
         {/* AI Feature Card */}
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-5">
-          <div className="flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-5">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">AI-Powered Calculations</h3>
+              <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-1">AI-Powered Calculations</h3>
               <p className="text-xs text-gray-700">
                 Gemini AI automatically calculates complex charges including late fees, discounts,
                 and generates detailed bill breakdowns based on payment history.
@@ -212,15 +212,15 @@ export default function BillGeneration() {
 
         {/* No Properties Message */}
         {properties.length === 0 ? (
-          <div className="text-center py-12">
-            <Receipt className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-base font-semibold text-gray-900 mb-2">No Properties Available</h3>
-            <p className="text-sm text-gray-600">
+          <div className="text-center py-8 sm:py-12">
+            <Receipt className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">No Properties Available</h3>
+            <p className="text-xs sm:text-sm text-gray-600">
               You need to add properties and assign tenants before generating bills.
             </p>
           </div>
         ) : (
-          <form onSubmit={handleGenerateBill} className="space-y-5">
+          <form onSubmit={handleGenerateBill} className="space-y-4 sm:space-y-5">
             {/* Property Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -244,23 +244,23 @@ export default function BillGeneration() {
 
             {/* Property Details */}
             {selectedPropertyData && (
-              <div className={`rounded-lg p-4 space-y-2 ${
+              <div className={`rounded-lg p-3 sm:p-4 space-y-2 ${
                 selectedPropertyData.status === 'occupied' 
                   ? 'bg-emerald-50 border border-emerald-200' 
                   : 'bg-amber-50 border border-amber-300'
               }`}>
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
                   <h3 className="font-semibold text-gray-900 text-sm">Property Details</h3>
                   {selectedPropertyData.status !== 'occupied' && (
-                    <span className="px-2.5 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full">
+                    <span className="px-2.5 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full w-fit">
                       NO TENANT
                     </span>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs">
                   <div>
                     <span className="text-gray-600">Tenant:</span>
-                    <span className="ml-2 font-medium text-gray-900">
+                    <span className="ml-2 font-medium text-gray-900 break-words">
                       {selectedPropertyData.tenant || 'N/A'}
                     </span>
                   </div>
@@ -308,7 +308,7 @@ export default function BillGeneration() {
             </div>
 
             {/* Usage Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Water Usage (units)
@@ -339,7 +339,7 @@ export default function BillGeneration() {
             </div>
 
             {/* Additional Charges */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Additional Charges (₹)
@@ -387,17 +387,17 @@ export default function BillGeneration() {
             <button
               type="submit"
               disabled={generating || !selectedProperty}
-              className="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {generating ? (
                 <>
                   <Loader className="w-5 h-5 animate-spin" />
-                  Generating with AI...
+                  <span>Generating with AI...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  Generate Bill with AI
+                  <span>Generate Bill with AI</span>
                 </>
               )}
             </button>
@@ -407,32 +407,32 @@ export default function BillGeneration() {
 
       {/* Bill Preview Modal */}
       {showPreview && generatedBill && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-5 flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Generated Bill</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto my-4">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-5 flex justify-between items-center z-10">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Generated Bill</h2>
               <button
                 onClick={() => {
                   setShowPreview(false);
                   setGeneratedBill(null);
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 flex-shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-5">
+            <div className="p-4 sm:p-5">
               {/* Bill Details */}
-              <div className="bg-indigo-50 rounded-lg p-5 mb-5">
-                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+              <div className="bg-indigo-50 rounded-lg p-4 sm:p-5 mb-4 sm:mb-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm mb-4">
                   <div>
                     <p className="text-gray-600 text-xs">Tenant</p>
-                    <p className="font-semibold text-gray-900">{generatedBill.tenantName}</p>
+                    <p className="font-semibold text-gray-900 break-words">{generatedBill.tenantName}</p>
                   </div>
                   <div>
                     <p className="text-gray-600 text-xs">Property</p>
-                    <p className="font-semibold text-gray-900">{generatedBill.flatNumber}</p>
+                    <p className="font-semibold text-gray-900 break-words">{generatedBill.flatNumber}</p>
                   </div>
                   <div>
                     <p className="text-gray-600 text-xs">Month</p>
@@ -448,25 +448,25 @@ export default function BillGeneration() {
 
                 <div className="border-t border-indigo-200 pt-4">
                   <p className="text-gray-600 text-xs mb-1">Total Amount</p>
-                  <p className="text-3xl font-bold text-indigo-600">₹{generatedBill.total}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-indigo-600 break-words">₹{generatedBill.total}</p>
                 </div>
               </div>
 
-              {/* AI Breakdown - NO GRADIENT */}
+              {/* AI Breakdown */}
               {generatedBill.breakdown && (
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-5">
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-5">
                   <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="w-4 h-4 text-purple-600" />
+                    <Sparkles className="w-4 h-4 text-purple-600 flex-shrink-0" />
                     <h3 className="font-semibold text-purple-900 text-sm">AI-Generated Breakdown:</h3>
                   </div>
-                  <div className="text-sm text-gray-700 whitespace-pre-line">
+                  <div className="text-xs sm:text-sm text-gray-700 whitespace-pre-line break-words">
                     {generatedBill.breakdown}
                   </div>
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 {!billSentSuccess ? (
                   <>
                     <button
@@ -474,22 +474,22 @@ export default function BillGeneration() {
                         setShowPreview(false);
                         setGeneratedBill(null);
                       }}
-                      className="flex-1 px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                      className="flex-1 px-4 sm:px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
                     >
                       Close
                     </button>
                     <button
                       onClick={handleSendBill}
-                      className="flex-1 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                      className="flex-1 px-4 sm:px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium text-sm flex items-center justify-center gap-2"
                     >
                       <Send className="w-4 h-4" />
-                      Send to Tenant
+                      <span>Send to Tenant</span>
                     </button>
                   </>
                 ) : (
-                  <div className="flex-1 px-6 py-2.5 bg-emerald-600 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2">
+                  <div className="flex-1 px-4 sm:px-6 py-2.5 bg-emerald-600 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2">
                     <CheckCircle className="w-4 h-4" />
-                    Bill Sent Successfully!
+                    <span>Bill Sent Successfully!</span>
                   </div>
                 )}
               </div>

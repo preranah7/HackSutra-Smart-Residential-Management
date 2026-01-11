@@ -54,9 +54,9 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex overflow-x-hidden">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 to-primary-800 p-12 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 to-primary-800 p-8 xl:p-12 flex-col justify-between relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
@@ -65,21 +65,21 @@ function Login() {
 
         <div className="relative z-10">
           <div className="flex items-center space-x-3 mb-8">
-            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl flex-shrink-0">
               <Building2 className="w-8 h-8 text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">SocietyHub</h1>
-              <p className="text-blue-100 text-sm">Smart Living Platform</p>
+            <div className="min-w-0">
+              <h1 className="text-xl xl:text-2xl font-bold text-white truncate">SocietyHub</h1>
+              <p className="text-blue-100 text-sm truncate">Smart Living Platform</p>
             </div>
           </div>
 
-          <div className="space-y-8 mt-16">
+          <div className="space-y-6 xl:space-y-8 mt-12 xl:mt-16">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <h2 className="text-3xl font-bold text-white mb-4">
+              <h2 className="text-2xl xl:text-3xl font-bold text-white mb-4">
                 Welcome Back!
               </h2>
-              <p className="text-blue-100 text-lg leading-relaxed">
+              <p className="text-blue-100 text-base xl:text-lg leading-relaxed">
                 Manage your residential community with intelligent automation, 
                 transparent billing, and seamless communication.
               </p>
@@ -87,54 +87,54 @@ function Login() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="text-3xl font-bold text-white mb-1">10K+</div>
-                <div className="text-blue-100 text-sm">Happy Residents</div>
+                <div className="text-2xl xl:text-3xl font-bold text-white mb-1">10K+</div>
+                <div className="text-blue-100 text-xs xl:text-sm">Happy Residents</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <div className="text-3xl font-bold text-white mb-1">98%</div>
-                <div className="text-blue-100 text-sm">Satisfaction Rate</div>
+                <div className="text-2xl xl:text-3xl font-bold text-white mb-1">98%</div>
+                <div className="text-blue-100 text-xs xl:text-sm">Satisfaction Rate</div>
               </div>
             </div>
           </div>
         </div>
 
         <div className="relative z-10">
-          <p className="text-blue-100 text-sm">
+          <p className="text-blue-100 text-xs xl:text-sm">
             © 2026 SocietyHub. Powered by Google AI
           </p>
         </div>
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center justify-center mb-8">
-            <div className="bg-primary-100 p-3 rounded-xl">
+          <div className="lg:hidden flex items-center justify-center mb-6 sm:mb-8">
+            <div className="bg-primary-100 p-3 rounded-xl flex-shrink-0">
               <Building2 className="w-8 h-8 text-primary-600" />
             </div>
-            <div className="ml-3">
-              <h1 className="text-xl font-bold text-gray-900">SocietyHub</h1>
+            <div className="ml-3 min-w-0">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">SocietyHub</h1>
             </div>
           </div>
 
           <div className="animate-slide-up">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                 Sign in to your account
               </h2>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 Enter your credentials to access your dashboard
               </p>
             </div>
 
             {error && (
-              <div className="animate-scale-in">
+              <div className="animate-scale-in mb-4">
                 <Alert type="error" message={error} onClose={() => setError('')} />
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
@@ -147,7 +147,7 @@ function Login() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="input-field pl-10"
+                    className="input-field pl-10 text-sm sm:text-base"
                     placeholder="you@example.com"
                     required
                   />
@@ -161,7 +161,7 @@ function Login() {
                   </label>
                   <button
                     type="button"
-                    className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                    className="text-xs sm:text-sm text-primary-600 hover:text-primary-700 font-medium"
                   >
                     Forgot password?
                   </button>
@@ -174,7 +174,7 @@ function Login() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="input-field pl-10 pr-10"
+                    className="input-field pl-10 pr-10 text-sm sm:text-base"
                     placeholder="Enter your password"
                     required
                   />
@@ -195,7 +195,7 @@ function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn btn-primary w-full py-3 text-base font-semibold flex items-center justify-center group"
+                className="btn btn-primary w-full py-2.5 sm:py-3 text-sm sm:text-base font-semibold flex items-center justify-center group"
               >
                 {loading ? (
                   <>
@@ -211,12 +211,12 @@ function Login() {
               </button>
             </form>
 
-            <div className="mt-6">
+            <div className="mt-5 sm:mt-6">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
                 </div>
-                <div className="relative flex justify-center text-sm">
+                <div className="relative flex justify-center text-xs sm:text-sm">
                   <span className="px-4 bg-white text-gray-500">
                     New to SocietyHub?
                   </span>
@@ -225,36 +225,36 @@ function Login() {
 
               <Link
                 to="/signup"
-                className="mt-4 btn btn-outline w-full py-3 text-base font-semibold"
+                className="mt-4 btn btn-outline w-full py-2.5 sm:py-3 text-sm sm:text-base font-semibold"
               >
                 Create an account
               </Link>
             </div>
 
             {/* Demo Credentials */}
-            <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
-              <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+            <div className="mt-6 sm:mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 sm:p-5 border border-blue-100">
+              <p className="text-xs sm:text-sm font-semibold text-gray-700 mb-3 flex items-center flex-wrap">
                 <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2">
                   Demo
                 </span>
                 Try these test accounts
               </p>
-              <div className="space-y-2 text-xs text-gray-600">
-                <div className="flex items-center justify-between p-2 bg-white rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-900">Tenant</p>
-                    <p className="text-gray-500">tenant@test.com</p>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center justify-between p-2 bg-white rounded-lg gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-gray-900 truncate">Tenant</p>
+                    <p className="text-gray-500 truncate">tenant@test.com</p>
                   </div>
-                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700">
+                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700 whitespace-nowrap text-xs">
                     Test@123
                   </code>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-white rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-900">Admin</p>
-                    <p className="text-gray-500">admin@test.com</p>
+                <div className="flex items-center justify-between p-2 bg-white rounded-lg gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-gray-900 truncate">Admin</p>
+                    <p className="text-gray-500 truncate">admin@test.com</p>
                   </div>
-                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700">
+                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700 whitespace-nowrap text-xs">
                     Test@123
                   </code>
                 </div>

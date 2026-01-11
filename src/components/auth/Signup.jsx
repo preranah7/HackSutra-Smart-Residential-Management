@@ -98,55 +98,55 @@ function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4 overflow-y-auto overflow-x-hidden">
+      <div className="w-full max-w-2xl py-4 sm:py-6">
         {/* Logo */}
-        <div className="flex items-center justify-center mb-8 animate-slide-up">
-          <div className="bg-primary-100 p-3 rounded-xl">
+        <div className="flex items-center justify-center mb-6 sm:mb-8 animate-slide-up">
+          <div className="bg-primary-100 p-3 rounded-xl flex-shrink-0">
             <Building2 className="w-8 h-8 text-primary-600" />
           </div>
-          <div className="ml-3">
-            <h1 className="text-xl font-bold text-gray-900">SocietyHub</h1>
-            <p className="text-sm text-gray-600">Smart Living Platform</p>
+          <div className="ml-3 min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">SocietyHub</h1>
+            <p className="text-xs sm:text-sm text-gray-600 truncate">Smart Living Platform</p>
           </div>
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center space-x-4">
+        <div className="mb-6 sm:mb-8 px-2">
+          <div className="flex items-center justify-center space-x-2 sm:space-x-4">
             <div className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold transition-all text-sm sm:text-base ${
                 currentStep >= 1 
                   ? 'bg-primary-600 text-white' 
                   : 'bg-gray-200 text-gray-600'
               }`}>
-                {currentStep > 1 ? <CheckCircle2 className="w-6 h-6" /> : '1'}
+                {currentStep > 1 ? <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" /> : '1'}
               </div>
-              <span className="ml-2 text-sm font-medium hidden sm:inline">Basic Info</span>
+              <span className="ml-2 text-xs sm:text-sm font-medium hidden xs:inline">Basic Info</span>
             </div>
-            <div className={`w-16 h-1 rounded-full transition-all ${
+            <div className={`w-12 sm:w-16 h-1 rounded-full transition-all ${
               currentStep >= 2 ? 'bg-primary-600' : 'bg-gray-200'
             }`}></div>
             <div className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold transition-all text-sm sm:text-base ${
                 currentStep >= 2 
                   ? 'bg-primary-600 text-white' 
                   : 'bg-gray-200 text-gray-600'
               }`}>
                 2
               </div>
-              <span className="ml-2 text-sm font-medium hidden sm:inline">Account Setup</span>
+              <span className="ml-2 text-xs sm:text-sm font-medium hidden xs:inline">Account Setup</span>
             </div>
           </div>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 animate-scale-in">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 animate-scale-in">
+          <div className="mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
               {currentStep === 1 ? 'Create your account' : 'Set up your password'}
             </h2>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               {currentStep === 1 
                 ? 'Enter your details to get started' 
                 : 'Create a secure password for your account'}
@@ -154,16 +154,16 @@ function Signup() {
           </div>
 
           {error && (
-            <div className="animate-scale-in mb-6">
+            <div className="animate-scale-in mb-4 sm:mb-6">
               <Alert type="error" message={error} onClose={() => setError('')} />
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {currentStep === 1 ? (
               <>
                 {/* Step 1: Basic Information */}
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Full Name <span className="text-red-500">*</span>
@@ -177,7 +177,7 @@ function Signup() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        className="input-field pl-10"
+                        className="input-field pl-10 text-sm sm:text-base"
                         placeholder="John Doe"
                         required
                       />
@@ -197,7 +197,7 @@ function Signup() {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="input-field pl-10"
+                        className="input-field pl-10 text-sm sm:text-base"
                         placeholder="you@example.com"
                         required
                       />
@@ -217,7 +217,7 @@ function Signup() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="input-field pl-10"
+                        className="input-field pl-10 text-sm sm:text-base"
                         placeholder="9876543210"
                         required
                       />
@@ -232,7 +232,7 @@ function Signup() {
                       name="role"
                       value={formData.role}
                       onChange={handleChange}
-                      className="input-field"
+                      className="input-field text-sm sm:text-base"
                     >
                       <option value={ROLES.TENANT}>Tenant (Renting a flat)</option>
                       <option value={ROLES.LANDLORD}>Landlord (Own property)</option>
@@ -254,7 +254,7 @@ function Signup() {
                           name="flatNumber"
                           value={formData.flatNumber}
                           onChange={handleChange}
-                          className="input-field pl-10"
+                          className="input-field pl-10 text-sm sm:text-base"
                           placeholder="302"
                         />
                       </div>
@@ -265,7 +265,7 @@ function Signup() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="btn btn-primary w-full py-3 text-base font-semibold flex items-center justify-center group"
+                  className="btn btn-primary w-full py-2.5 sm:py-3 text-sm sm:text-base font-semibold flex items-center justify-center group"
                 >
                   Continue
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -274,7 +274,7 @@ function Signup() {
             ) : (
               <>
                 {/* Step 2: Password Setup */}
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Password <span className="text-red-500">*</span>
@@ -288,7 +288,7 @@ function Signup() {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        className="input-field pl-10 pr-10"
+                        className="input-field pl-10 pr-10 text-sm sm:text-base"
                         placeholder="Create a strong password"
                         required
                       />
@@ -322,7 +322,7 @@ function Signup() {
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        className="input-field pl-10"
+                        className="input-field pl-10 text-sm sm:text-base"
                         placeholder="Re-enter your password"
                         required
                       />
@@ -330,18 +330,18 @@ function Signup() {
                   </div>
                 </div>
 
-                <div className="flex space-x-3">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                   <button
                     type="button"
                     onClick={() => setCurrentStep(1)}
-                    className="btn btn-secondary flex-1 py-3 text-base font-semibold"
+                    className="btn btn-secondary w-full sm:flex-1 py-2.5 sm:py-3 text-sm sm:text-base font-semibold"
                   >
                     Back
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="btn btn-primary flex-1 py-3 text-base font-semibold flex items-center justify-center"
+                    className="btn btn-primary w-full sm:flex-1 py-2.5 sm:py-3 text-sm sm:text-base font-semibold flex items-center justify-center"
                   >
                     {loading ? (
                       <>
@@ -357,8 +357,8 @@ function Signup() {
             )}
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+          <div className="mt-5 sm:mt-6 text-center">
+            <p className="text-xs sm:text-sm text-gray-600">
               Already have an account?{' '}
               <Link 
                 to="/login" 
@@ -370,7 +370,7 @@ function Signup() {
           </div>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-xs sm:text-sm text-gray-500 mt-4 sm:mt-6 px-4">
           By signing up, you agree to our{' '}
           <button className="text-primary-600 hover:underline">Terms of Service</button>
           {' '}and{' '}

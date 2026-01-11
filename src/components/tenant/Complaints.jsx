@@ -149,15 +149,15 @@ export default function Complaints() {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'open':
-        return <AlertCircle className="w-5 h-5 text-red-500" />;
+        return <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />;
       case 'in-progress':
-        return <Clock className="w-5 h-5 text-amber-500" />;
+        return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />;
       case 'resolved':
-        return <CheckCircle className="w-5 h-5 text-emerald-500" />;
+        return <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" />;
       case 'closed':
-        return <CheckCircle className="w-5 h-5 text-gray-500" />;
+        return <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />;
       default:
-        return <AlertCircle className="w-5 h-5 text-gray-500" />;
+        return <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />;
     }
   };
 
@@ -193,11 +193,11 @@ export default function Complaints() {
 
   if (!activeUser?.uid) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-sm">Loading complaints...</p>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 text-xs sm:text-sm">Loading complaints...</p>
           </div>
         </div>
       </div>
@@ -205,7 +205,7 @@ export default function Complaints() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 w-full overflow-x-hidden px-2 sm:px-0">
       {alert && (
         <Alert
           type={alert.type}
@@ -215,14 +215,14 @@ export default function Complaints() {
       )}
 
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">My Complaints</h1>
-          <p className="text-sm text-gray-600">Track and manage your maintenance requests</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-1">My Complaints</h1>
+          <p className="text-xs sm:text-sm text-gray-600">Track and manage your maintenance requests</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
+          className="px-3 sm:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium text-xs sm:text-sm flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           New Complaint
@@ -230,106 +230,106 @@ export default function Complaints() {
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-xs font-medium mb-1">Total</p>
-              <p className="text-2xl font-semibold text-gray-900">{complaints.length}</p>
+              <p className="text-xl sm:text-2xl font-semibold text-gray-900">{complaints.length}</p>
             </div>
-            <AlertCircle className="w-8 h-8 text-gray-300" />
+            <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-gray-300" />
           </div>
         </div>
-        <div className="bg-red-50 rounded-lg shadow-sm border border-red-100 p-5">
+        <div className="bg-red-50 rounded-lg shadow-sm border border-red-100 p-3 sm:p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-red-700 text-xs font-medium mb-1">Open</p>
-              <p className="text-2xl font-semibold text-red-900">
+              <p className="text-xl sm:text-2xl font-semibold text-red-900">
                 {complaints.filter(c => c.status === 'open').length}
               </p>
             </div>
-            <AlertCircle className="w-8 h-8 text-red-300" />
+            <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-300" />
           </div>
         </div>
-        <div className="bg-amber-50 rounded-lg shadow-sm border border-amber-100 p-5">
+        <div className="bg-amber-50 rounded-lg shadow-sm border border-amber-100 p-3 sm:p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-amber-700 text-xs font-medium mb-1">In Progress</p>
-              <p className="text-2xl font-semibold text-amber-900">
+              <p className="text-xl sm:text-2xl font-semibold text-amber-900">
                 {complaints.filter(c => c.status === 'in-progress').length}
               </p>
             </div>
-            <Clock className="w-8 h-8 text-amber-300" />
+            <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-amber-300" />
           </div>
         </div>
-        <div className="bg-emerald-50 rounded-lg shadow-sm border border-emerald-100 p-5">
+        <div className="bg-emerald-50 rounded-lg shadow-sm border border-emerald-100 p-3 sm:p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-emerald-700 text-xs font-medium mb-1">Resolved</p>
-              <p className="text-2xl font-semibold text-emerald-900">
+              <p className="text-xl sm:text-2xl font-semibold text-emerald-900">
                 {complaints.filter(c => c.status === 'resolved' || c.status === 'closed').length}
               </p>
             </div>
-            <CheckCircle className="w-8 h-8 text-emerald-300" />
+            <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-300" />
           </div>
         </div>
       </div>
 
       {/* Complaints List */}
       {complaints.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <h3 className="text-base font-semibold text-gray-900 mb-2">No Complaints Yet</h3>
-          <p className="text-sm text-gray-600 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
+          <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-gray-300" />
+          <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">No Complaints Yet</h3>
+          <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
             You haven't submitted any complaints. Click the button above to create one.
           </p>
           <button
             onClick={() => setShowModal(true)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium text-sm inline-flex items-center gap-2"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium text-xs sm:text-sm inline-flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Create First Complaint
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           {complaints.map(complaint => (
-            <div key={complaint.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+            <div key={complaint.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow">
               {/* Header */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-start gap-2.5 flex-1">
+              <div className="flex items-start justify-between mb-3 gap-2">
+                <div className="flex items-start gap-2 sm:gap-2.5 flex-1 min-w-0">
                   {getStatusIcon(complaint.status)}
-                  <div className="flex-1">
-                    <h3 className="text-base font-semibold text-gray-900 mb-0.5">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-0.5 break-words">
                       {complaint.title}
                     </h3>
                     <p className="text-xs text-gray-500">{complaint.category}</p>
                   </div>
                 </div>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getPriorityColor(complaint.priority)}`}>
+                <span className={`px-2 sm:px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(complaint.priority)}`}>
                   {complaint.priority}
                 </span>
               </div>
 
               {/* Description */}
-              <p className="text-gray-700 mb-3 text-sm leading-relaxed">
+              <p className="text-gray-700 mb-3 text-xs sm:text-sm leading-relaxed break-words">
                 {complaint.description}
               </p>
 
               {/* Details */}
               <div className="space-y-1.5 mb-3 text-xs">
                 {complaint.location && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 flex-wrap">
                     <span className="font-medium">Location:</span>
-                    <span>{complaint.location}</span>
+                    <span className="break-words">{complaint.location}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-gray-600 flex-wrap">
                   <span className="font-medium">Submitted:</span>
                   <span>{formatRelativeTime(complaint.createdAt)}</span>
                 </div>
                 {complaint.estimatedTime && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 flex-wrap">
                     <span className="font-medium">Estimated Time:</span>
                     <span>{complaint.estimatedTime}</span>
                   </div>
@@ -340,7 +340,7 @@ export default function Complaints() {
               <div className={`border rounded-lg p-2.5 mb-3 ${getStatusColor(complaint.status)}`}>
                 <div className="flex items-center gap-2">
                   {getStatusIcon(complaint.status)}
-                  <span className="font-medium capitalize text-sm">{complaint.status.replace('-', ' ')}</span>
+                  <span className="font-medium capitalize text-xs sm:text-sm">{complaint.status.replace('-', ' ')}</span>
                 </div>
               </div>
 
@@ -349,9 +349,9 @@ export default function Complaints() {
                 <div className="bg-blue-50 border-l-4 border-blue-500 p-3 mb-3 rounded">
                   <div className="flex items-start gap-2">
                     <MessageSquare className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-blue-900 mb-0.5">Admin Response:</p>
-                      <p className="text-xs text-blue-800">{complaint.adminResponse}</p>
+                      <p className="text-xs text-blue-800 break-words">{complaint.adminResponse}</p>
                     </div>
                   </div>
                 </div>
@@ -360,11 +360,11 @@ export default function Complaints() {
               {/* Tenant Feedback Section */}
               {complaint.status === 'resolved' && (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                  <p className="text-xs text-emerald-800 font-medium mb-2 flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4" />
-                    Admin marked this as resolved. Is the issue fixed?
+                  <p className="text-xs text-emerald-800 font-medium mb-2 flex items-center gap-2 flex-wrap">
+                    <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>Admin marked this as resolved. Is the issue fixed?</span>
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <button
                       onClick={() => handleConfirmResolution(complaint.id, true)}
                       className="flex-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium text-xs flex items-center justify-center gap-1.5"
@@ -387,7 +387,7 @@ export default function Complaints() {
               {complaint.tenantFeedback && (
                 <div className="bg-gray-50 border-l-4 border-gray-400 p-3 rounded">
                   <p className="text-xs font-medium text-gray-900 mb-0.5">Your Feedback:</p>
-                  <p className="text-xs text-gray-700">{complaint.tenantFeedback}</p>
+                  <p className="text-xs text-gray-700 break-words">{complaint.tenantFeedback}</p>
                 </div>
               )}
             </div>
@@ -397,10 +397,10 @@ export default function Complaints() {
 
       {/* Create Complaint Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-xl font-semibold text-gray-900">Submit New Complaint</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 sm:mb-5">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Submit New Complaint</h2>
               <button
                 onClick={() => {
                   setShowModal(false);
@@ -418,9 +418,9 @@ export default function Complaints() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   Complaint Title *
                 </label>
                 <input
@@ -428,21 +428,21 @@ export default function Complaints() {
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm"
                   placeholder="Brief title of your complaint"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                     Category *
                   </label>
                   <select
                     required
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm"
                   >
                     <option value="">Select category</option>
                     {COMPLAINT_CATEGORIES.map(cat => (
@@ -452,14 +452,14 @@ export default function Complaints() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                     Priority *
                   </label>
                   <select
                     required
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm"
                   >
                     {PRIORITY_LEVELS.map(priority => (
                       <option key={priority.value} value={priority.value}>
@@ -471,20 +471,20 @@ export default function Complaints() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   Location
                 </label>
                 <input
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm"
                   placeholder="e.g., Bedroom, Kitchen, Common Area"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   Description *
                 </label>
                 <textarea
@@ -492,7 +492,7 @@ export default function Complaints() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows="4"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm"
                   placeholder="Describe the issue in detail..."
                 />
               </div>
@@ -503,7 +503,7 @@ export default function Complaints() {
                 </p>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -516,20 +516,21 @@ export default function Complaints() {
                       location: ''
                     });
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-xs sm:text-sm"
                   disabled={submitting}
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleSubmit}
                   disabled={submitting}
-                  className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Submitting...' : 'Submit Complaint'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

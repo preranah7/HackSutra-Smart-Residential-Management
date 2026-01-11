@@ -3,78 +3,280 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
     
-    // Helper functions
+    // Check if user is authenticated
     function isSignedIn() {
       return request.auth != null;
     }
     
+    // Check if user document exists
     function userExists() {
       return exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
     
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    // Get user role - safe version that doesn't fail
+    function getUserRole() {
+      return userExists() ? 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role : 
+        '';
     }
     
-    // Users collection - wide open for testing
+    // Check if user owns the resource
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    
+    // ============================================
+    // USERS COLLECTION - SECURE BUT FUNCTIONAL
+    // ============================================
     match /users/{userId} {
-      allow read, write: if isSignedIn();
+      // Users can read their own profile, admins can read all
+      allow read: if isOwner(userId) || getUserRole() == 'admin';
+      
+      // Allow reading during get() calls in rules (needed for getUserRole)
+      allow get: if isSignedIn();
+      
+      // Only the user can create their own profile during signup
+      allow create: if isOwner(userId) && 
+                      request.resource.data.uid == request.auth.uid &&
+                      request.resource.data.email == request.auth.token.email;
+      
+      // Users can update their own profile, admins can update any
+      allow update: if isOwner(userId) || getUserRole() == 'admin';
+      
+      // Only admins can delete users
+      allow delete: if getUserRole() == 'admin';
     }
     
-    // Properties - wide open for testing
+    
+    // ============================================
+    // PROPERTIES COLLECTION
+    // ============================================
     match /properties/{propertyId} {
-      allow read, write: if isSignedIn();
-    }
-    
-    // Bills - DEBUG VERSION with detailed logging
-    match /bills/{billId} {
-      // Allow read for authenticated users
+      // All authenticated users can read properties (needed for tenant to see their property)
       allow read: if isSignedIn();
       
-      // Allow create if:
-      // 1. User is signed in
-      // 2. User document exists
-      // 3. landlordId matches auth uid
+      // Landlords and admins can create properties
       allow create: if isSignedIn() && 
-                      userExists() &&
-                      request.resource.data.landlordId == request.auth.uid;
+                      request.resource.data.landlordId == request.auth.uid &&
+                      (getUserRole() == 'landlord' || getUserRole() == 'admin');
       
-      allow update, delete: if isSignedIn();
+      // Landlords can update their own properties, admins can update any
+      allow update: if isSignedIn() && 
+                      (resource.data.landlordId == request.auth.uid || 
+                       getUserRole() == 'admin');
+      
+      // Landlords can delete their own properties, admins can delete any
+      allow delete: if isSignedIn() && 
+                      (resource.data.landlordId == request.auth.uid || 
+                       getUserRole() == 'admin');
     }
     
-    // Complaints - wide open for testing
+    
+    // ============================================
+    // BILLS COLLECTION - SECURE ACCESS
+    // ============================================
+    match /bills/{billId} {
+      // Admins: read all bills
+      // Landlords: read only THEIR bills (landlordId matches)
+      // Tenants: read only bills sent to their email
+      allow read: if isSignedIn() && 
+                    (getUserRole() == 'admin' || 
+                     (getUserRole() == 'landlord' && resource.data.landlordId == request.auth.uid) ||
+                     resource.data.tenantEmail == request.auth.token.email);
+      
+      // Allow listing with proper query filters
+      // Your code MUST query with: where('landlordId', '==', user.uid)
+      allow list: if isSignedIn() && 
+                    (getUserRole() == 'admin' || 
+                     getUserRole() == 'landlord' ||
+                     getUserRole() == 'tenant');
+      
+      // Landlords and admins can create bills
+      allow create: if isSignedIn() && 
+                      request.resource.data.landlordId == request.auth.uid &&
+                      (getUserRole() == 'landlord' || getUserRole() == 'admin');
+      
+      // Landlords can update their own bills, tenants can update payment status only
+      allow update: if isSignedIn() &&
+                      (getUserRole() == 'admin' ||
+                       (getUserRole() == 'landlord' && resource.data.landlordId == request.auth.uid) ||
+                       (resource.data.tenantEmail == request.auth.token.email &&
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['status', 'paidAt', 'paymentMethod', 'transactionId', 'updatedAt'])));
+      
+      // Only landlords who created the bill or admins can delete
+      allow delete: if isSignedIn() && 
+                      (getUserRole() == 'admin' || 
+                       (getUserRole() == 'landlord' && resource.data.landlordId == request.auth.uid));
+    }
+    
+    
+    // ============================================
+    // COMPLAINTS COLLECTION - WORKING VERSION
+    // ============================================
     match /complaints/{complaintId} {
-      allow read, write: if isSignedIn();
+      // Users can read their own complaints, admins/landlords can read all
+      allow read: if isSignedIn() && 
+                    (getUserRole() == 'admin' || 
+                     getUserRole() == 'landlord' ||
+                     resource.data.userId == request.auth.uid);
+      
+      // Allow list for queries
+      allow list: if isSignedIn();
+      
+      // Any authenticated user can create complaints
+      allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.userEmail == request.auth.token.email;
+      
+      // Admins: can update any field
+      // Landlords: can update status and admin response fields
+      // Users: can update their own complaint's feedback fields
+      allow update: if isSignedIn() && 
+                      (getUserRole() == 'admin' || 
+                       getUserRole() == 'landlord' ||
+                       (resource.data.userId == request.auth.uid &&
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['status', 'tenantFeedback', 'tenantFeedbackAt', 'updatedAt', 'closedAt', 'closedBy'])));
+      
+      // Only admins can delete complaints
+      allow delete: if getUserRole() == 'admin';
     }
     
-    // Parking - wide open for testing
+    
+    // ============================================
+    // PARKING SLOTS COLLECTION
+    // ============================================
     match /parkingSlots/{slotId} {
-      allow read, write: if isSignedIn();
+      // Anyone authenticated can read parking slots
+      allow read: if isSignedIn();
+      
+      // Allow listing all slots
+      allow list: if isSignedIn();
+      
+      // Only admins can create parking slots
+      allow create: if getUserRole() == 'admin';
+      
+      // Admins can update, OR any authenticated user for booking/reservation
+      // (The slot update happens when creating a booking)
+      allow update: if isSignedIn();
+      
+      // Only admins can delete parking slots
+      allow delete: if getUserRole() == 'admin';
     }
     
+    
+    // ============================================
+    // PARKING BOOKINGS COLLECTION
+    // ============================================
     match /parkingBookings/{bookingId} {
-      allow read, write: if isSignedIn();
+      // Users can read their own bookings, admins/landlords can read all
+      allow read: if isSignedIn() && 
+                    (getUserRole() == 'admin' || 
+                     getUserRole() == 'landlord' ||
+                     resource.data.userId == request.auth.uid);
+      
+      // Allow list for queries
+      allow list: if isSignedIn();
+      
+      // Any authenticated user can create bookings for themselves
+      allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid;
+      
+      // Users can update their own bookings, admins/landlords can update any
+      allow update: if isSignedIn() && 
+                      (getUserRole() == 'admin' || 
+                       getUserRole() == 'landlord' ||
+                       resource.data.userId == request.auth.uid);
+      
+      // Users can delete their own bookings, admins/landlords can delete any
+      allow delete: if isSignedIn() && 
+                      (getUserRole() == 'admin' || 
+                       getUserRole() == 'landlord' ||
+                       resource.data.userId == request.auth.uid);
     }
     
-    // Waste management - wide open for testing
+    
+    // ============================================
+    // WASTE MANAGEMENT COLLECTIONS
+    // ============================================
+    
+    // Waste Schedule Settings
     match /settings/{settingId} {
-      allow read, write: if isSignedIn();
+      // Everyone can read settings
+      allow read: if isSignedIn();
+      
+      // Only admins can create/update/delete settings
+      allow create, update, delete: if getUserRole() == 'admin';
     }
     
+    // Waste Collections (user records)
     match /wasteCollections/{collectionId} {
-      allow read, write: if isSignedIn();
+      // Users can read their own records, admins can read all
+      allow read: if isSignedIn() && 
+                    (getUserRole() == 'admin' || 
+                     resource.data.userId == request.auth.uid);
+      
+      // Allow list for queries
+      allow list: if isSignedIn();
+      
+      // Users can create their own waste collection records
+      allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid;
+      
+      // Only admins can update/delete waste collection records
+      allow update, delete: if getUserRole() == 'admin';
     }
     
+    // Waste Scores
     match /wasteScores/{userId} {
-      allow read, write: if isSignedIn();
+      // Anyone can read scores (for leaderboard)
+      allow read: if isSignedIn();
+      
+      // Allow listing for leaderboard
+      allow list: if isSignedIn();
+      
+      // Users can create/update their own scores, admins can manage all
+      allow create, update: if isSignedIn() && 
+                              (isOwner(userId) || getUserRole() == 'admin');
+      
+      // Only admins can delete scores
+      allow delete: if getUserRole() == 'admin';
     }
     
+    // Waste Requests
     match /wasteRequests/{requestId} {
-      allow read, write: if isSignedIn();
+      // Users can read their own requests, admins can read all
+      allow read: if isSignedIn() && 
+                    (getUserRole() == 'admin' || 
+                     resource.data.userId == request.auth.uid);
+      
+      // Allow list for queries
+      allow list: if isSignedIn();
+      
+      // Authenticated users can create waste requests
+      allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid;
+      
+      // Users can update their own requests, admins can update any
+      allow update: if isSignedIn() && 
+                      (getUserRole() == 'admin' || 
+                       resource.data.userId == request.auth.uid);
+      
+      // Only admins can delete requests
+      allow delete: if getUserRole() == 'admin';
     }
     
-    // Fallback
+    
+    // ============================================
+    // FALLBACK RULE
+    // ============================================
+    // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;
     }
