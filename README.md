@@ -12,7 +12,7 @@
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Live Demo](https://societyhub-app.web.app) • [Video Demo](https://drive.google.com/file/d/1udLI0ASVpT9K9E_AiY5BokWFFoF2qcR3/view?usp=drive_link) • [Documentation](./docs) • [Report Bug](https://github.com/preranah7/HackSutra-Smart-Residential-Management/issues) • [Request Feature](https://github.com/preranah7/HackSutra-Smart-Residential-Management/issues)
+[Live Demo](https://societyhub-app.web.app) • [Video Demo](https://drive.google.com/file/d/1udLI0ASVpT9K9E_AiY5BokWFFoF2qcR3/view?usp=drive_link) • [Report Bug](https://github.com/preranah7/HackSutra-Smart-Residential-Management/issues) • [Request Feature](https://github.com/preranah7/HackSutra-Smart-Residential-Management/issues)
 
 </div>
 
@@ -30,7 +30,6 @@
 - [Screenshots](#-screenshots)
 - [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
-- [License](#-license)
 - [Contact](#-contact)
 - [Acknowledgments](#-acknowledgments)
 
@@ -370,7 +369,7 @@ return () => unsubscribe();
 
 <p>
   <img src="./public/Parking_Form.png" alt="Parking Form" width="250"/>
-  <img src="./public/Parking_Booking.png" alt="Parking Booking" width="380" height="550"/>
+  <img src="./public/Parking_Booking.png" alt="Parking Booking" width="700" height="550"/>
 </p>
 
 *Color-coded parking availability updates in real-time*
@@ -378,9 +377,9 @@ return () => unsubscribe();
 ---
 
 ### Smart Complaints
-<p style="display:flex; align-items:center; gap:16px;">
+<p style="display:flex; align-items:center; gap:20px;">
   <img src="./public/Complaint_Form.png" alt="Complaint Form" height="350"/>
-  <img src="./public/Complaint_Resolve.png" alt="Complaint Resolution" width="280" height="350"/>
+  <img src="./public/Complaint_Resolve.png" alt="Complaint Resolution" width="250" height="350"/>
 </p>
 
 *Categorized complaints with priority and estimated resolution time*
@@ -456,9 +455,9 @@ Contributions make the open-source community an amazing place to learn, inspire,
 **Project Member:** Vaishnavi Saudagar
 - Email: preranahippargi7105@gmail.com / vaishnavi03saudagar@gmail.com
 - LinkedIn: [Prerana Hippargi](https://www.linkedin.com/in/prerana-hippargi-27756b321/)   
-            [Vaishnavi Saudagar](https://www.linkedin.com/in/vaishnavi-saudagar-a2115228b/)
+                             [Vaishnavi Saudagar](https://www.linkedin.com/in/vaishnavi-saudagar-a2115228b/)
 - GitHub: [@preranah7](https://github.com/preranah7)  
-          [@vaishnavi10200](https://github.com/vaishnavi10200)
+                     [@vaishnavi10200](https://github.com/vaishnavi10200)
           
 
 **Project Link:** [https://github.com/preranah7/HackSutra-Smart-Residential-Management](https://github.com/preranah7/HackSutra-Smart-Residential-Management)
