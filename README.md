@@ -255,7 +255,7 @@ Try the platform immediately with these test accounts:
 ### 📹 Watch Video Tutorial
 [Click here to watch the video](https://drive.google.com/file/d/1udLI0ASVpT9K9E_AiY5BokWFFoF2qcR3/view?usp=drive_link)
 
-<p align="center">
+<p>
   <img src="./public/Video_image.png" alt="Video Preview" width="400"/>
 </p>
 
@@ -267,7 +267,7 @@ Try the platform immediately with these test accounts:
 
 <p align="center">
   <a href="./public/Project_Architecture.png">
-    <img src="./public/Project_Architecture.png" alt="System Architecture" width="750"/>
+    <img src="./public/Project_Architecture.png" alt="System Architecture" width="550"/>
   </a>
 </p>
 
@@ -359,7 +359,7 @@ return () => unsubscribe();
 ---
 
 ### AI Bill Generation
-<img src="./public/BillGeneration.png" alt="AI Bill Generation" width="700"/>
+<img src="./public/BillGeneration.png" alt="AI Bill Generation" width="400" height="560"/>
 
 *Gemini AI generates accurate bills in 3 seconds*
 
@@ -370,7 +370,7 @@ return () => unsubscribe();
 
 <p>
   <img src="./public/Parking_Form.png" alt="Parking Form" width="250"/>
-  <img src="./public/Parking_Booking.png" alt="Parking Booking" width="320"/>
+  <img src="./public/Parking_Booking.png" alt="Parking Booking" width="380" height="550"/>
 </p>
 
 *Color-coded parking availability updates in real-time*
@@ -380,7 +380,7 @@ return () => unsubscribe();
 ### Smart Complaints
 <p style="display:flex; align-items:center; gap:16px;">
   <img src="./public/Complaint_Form.png" alt="Complaint Form" height="350"/>
-  <img src="./public/Complaint_Resolve.png" alt="Complaint Resolution" height="350"/>
+  <img src="./public/Complaint_Resolve.png" alt="Complaint Resolution" width="280" height="350"/>
 </p>
 
 *Categorized complaints with priority and estimated resolution time*
@@ -452,12 +452,12 @@ Contributions make the open-source community an amazing place to learn, inspire,
 **Team Name:** SheLeads
 
 
-**Project Lead:** [Prerana Hippargi]
-**Project Member:** [Vaishnavi Saudagar]
+**Project Lead:** Prerana Hippargi
+**Project Member:** Vaishnavi Saudagar
 - Email: preranahippargi7105@gmail.com / vaishnavi03saudagar@gmail.com
-- LinkedIn: [Prerana Hippargi](https://www.linkedin.com/in/prerana-hippargi-27756b321/) 
+- LinkedIn: [Prerana Hippargi](https://www.linkedin.com/in/prerana-hippargi-27756b321/)   
             [Vaishnavi Saudagar](https://www.linkedin.com/in/vaishnavi-saudagar-a2115228b/)
-- GitHub: [@preranah7](https://github.com/preranah7)
+- GitHub: [@preranah7](https://github.com/preranah7)  
           [@vaishnavi10200](https://github.com/vaishnavi10200)
           
 
