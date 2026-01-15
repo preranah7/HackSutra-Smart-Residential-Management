@@ -8,6 +8,7 @@ import LandlordDashboard from './components/landlord/LandlordDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
 import InitializeData from './components/admin/InitializeData';
 import PrivateRoute from './components/auth/PrivateRoute';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
           
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
+        <PWAInstallPrompt />
       </Router>
     </AuthProvider>
   );
