@@ -14,6 +14,7 @@ import BillGeneration from './BillGeneration';
 import ParkingManagement from '../tenant/ParkingManagement';
 import WasteManagement from '../tenant/WasteManagement';
 import Complaints from '../tenant/Complaints';
+import NotificationPermission from '../NotificationPermission';
 
 export default function LandlordDashboard() {
   const { user, userProfile, logout } = useAuth();
@@ -110,9 +111,8 @@ export default function LandlordDashboard() {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed lg:static w-72 bg-white shadow-sm min-h-screen flex flex-col z-40 transition-transform duration-300 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      }`}>
+      <div className={`fixed lg:static w-72 bg-white shadow-sm min-h-screen flex flex-col z-40 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
         <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-gray-200">
@@ -136,11 +136,10 @@ export default function LandlordDashboard() {
                 <button
                   key={item.id}
                   onClick={() => handleMenuClick(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 rounded-lg transition-colors text-sm font-medium ${
-                    isActive
+                  className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 rounded-lg transition-colors text-sm font-medium ${isActive
                       ? 'bg-indigo-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
                   <span className="truncate">{item.label}</span>
@@ -168,13 +167,16 @@ export default function LandlordDashboard() {
           {activeSection === 'overview' && (
             <div className="max-w-full">
               {/* Heading */}
-              <div className="mb-6 sm:mb-8">
-                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-1">
-                  Overview
-                </h1>
-                <p className="text-sm text-gray-600">
-                  Welcome back, {userProfile?.name || 'Landlord'}!
-                </p>
+              <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-1">
+                    Overview
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    Welcome back, {userProfile?.name || 'Landlord'}!
+                  </p>
+                </div>
+                <NotificationPermission userId={user.uid} userRole="landlord" />
               </div>
 
               {/* Stats Grid */}
@@ -232,10 +234,10 @@ export default function LandlordDashboard() {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {properties.map(property => {
-                      const isOccupied = property.status === 'occupied' || 
-                                        property.tenantId || 
-                                        property.tenant;
-                      
+                      const isOccupied = property.status === 'occupied' ||
+                        property.tenantId ||
+                        property.tenant;
+
                       return (
                         <div key={property.id} className="bg-white border border-gray-200 rounded-lg p-4 sm:p-5 hover:shadow-md transition-shadow">
                           <div className="flex justify-between items-start mb-3 gap-2">
@@ -243,11 +245,10 @@ export default function LandlordDashboard() {
                               <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">{property.flatNumber}</h3>
                               <p className="text-xs text-gray-500 truncate">{property.address}</p>
                             </div>
-                            <span className={`px-2 sm:px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                              isOccupied
-                                ? 'bg-emerald-100 text-emerald-700' 
+                            <span className={`px-2 sm:px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${isOccupied
+                                ? 'bg-emerald-100 text-emerald-700'
                                 : 'bg-gray-100 text-gray-700'
-                            }`}>
+                              }`}>
                               {isOccupied ? 'Occupied' : 'Vacant'}
                             </span>
                           </div>

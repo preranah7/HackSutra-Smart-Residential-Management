@@ -67,7 +67,7 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-ca84f546'], (function (workbox) { 'use strict';
+define(['./workbox-2203335d'], (function (workbox) { 'use strict';
 
   self.skipWaiting();
   workbox.clientsClaim();
@@ -82,7 +82,7 @@ define(['./workbox-ca84f546'], (function (workbox) { 'use strict';
     "revision": "3ca0b8505b4bec776b69afdba2768812"
   }, {
     "url": "index.html",
-    "revision": "0.99iuaghlgbg"
+    "revision": "0.pc1pagqdu9g"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
@@ -105,6 +105,10 @@ define(['./workbox-ca84f546'], (function (workbox) { 'use strict';
     }), new workbox.CacheableResponsePlugin({
       statuses: [0, 200]
     })]
+  }), 'GET');
+  workbox.registerRoute(/^https:\/\/fcm\.googleapis\.com\/.*/i, new workbox.NetworkOnly({
+    "cacheName": "fcm-cache",
+    plugins: []
   }), 'GET');
 
 }));

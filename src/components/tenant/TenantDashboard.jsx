@@ -13,6 +13,7 @@ import { formatCurrency, formatRelativeTime } from '../../utils/realtimeUtils';
 import Complaints from './Complaints';
 import ParkingManagement from './ParkingManagement';
 import WasteManagement from './WasteManagement';
+import NotificationPermission from '../NotificationPermission';
 
 export default function TenantDashboard() {
   const { user, userProfile, logout } = useAuth();
@@ -157,11 +158,10 @@ export default function TenantDashboard() {
                   <button
                     key={item.id}
                     onClick={() => handleMenuClick(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-colors text-xs sm:text-sm font-medium ${
-                      isActive
+                    className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-colors text-xs sm:text-sm font-medium ${isActive
                         ? 'bg-indigo-600 text-white'
                         : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     <span className="whitespace-nowrap">{item.label}</span>
@@ -188,11 +188,16 @@ export default function TenantDashboard() {
           {activeSection === 'overview' && (
             <div className="w-full">
               {/* Heading */}
-              <div className="mb-6 sm:mb-8">
-                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-1">
-                  Overview
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-600">Welcome back, {userProfile?.name || 'Tenant'}!</p>
+              <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-1">
+                    Overview
+                  </h1>
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Welcome back, {userProfile?.name || 'Tenant'}!
+                  </p>
+                </div>
+                <NotificationPermission userId={user.uid} userRole="tenant" />
               </div>
 
               {/* Stats Grid */}
@@ -235,7 +240,7 @@ export default function TenantDashboard() {
               <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-base sm:text-lg font-semibold text-gray-900">Recent Bills</h2>
-                  <button 
+                  <button
                     onClick={() => setActiveSection('bills')}
                     className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-700 font-medium"
                   >
@@ -262,11 +267,10 @@ export default function TenantDashboard() {
                         </div>
                         <div className="flex items-center justify-between sm:text-right sm:block ml-11 sm:ml-0">
                           <p className="font-semibold text-gray-900 text-sm sm:text-base">{formatCurrency(bill.total)}</p>
-                          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${
-                            bill.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
-                            bill.status === 'overdue' ? 'bg-red-100 text-red-700' :
-                            'bg-amber-100 text-amber-700'
-                          }`}>
+                          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${bill.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
+                              bill.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                                'bg-amber-100 text-amber-700'
+                            }`}>
                             {bill.status}
                           </span>
                         </div>
@@ -280,7 +284,7 @@ export default function TenantDashboard() {
               <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h2 className="text-base sm:text-lg font-semibold text-gray-900">Recent Complaints</h2>
-                  <button 
+                  <button
                     onClick={() => setActiveSection('complaints')}
                     className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-700 font-medium"
                   >
@@ -305,11 +309,10 @@ export default function TenantDashboard() {
                             <p className="text-xs sm:text-sm text-gray-500">{complaint.category}</p>
                           </div>
                         </div>
-                        <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap self-start sm:self-auto ml-11 sm:ml-0 ${
-                          complaint.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' :
-                          complaint.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
-                          'bg-orange-100 text-orange-700'
-                        }`}>
+                        <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap self-start sm:self-auto ml-11 sm:ml-0 ${complaint.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' :
+                            complaint.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
+                              'bg-orange-100 text-orange-700'
+                          }`}>
                           {complaint.status}
                         </span>
                       </div>
@@ -341,15 +344,14 @@ export default function TenantDashboard() {
                           <h3 className="text-sm sm:text-base font-semibold text-gray-900">{bill.month}</h3>
                           <p className="text-xs text-gray-500">{formatRelativeTime(bill.generatedAt)}</p>
                         </div>
-                        <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${
-                          bill.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
-                          bill.status === 'overdue' ? 'bg-red-100 text-red-700' :
-                          'bg-amber-100 text-amber-700'
-                        }`}>
+                        <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${bill.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
+                            bill.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                              'bg-amber-100 text-amber-700'
+                          }`}>
                           {bill.status}
                         </span>
                       </div>
-                      
+
                       <div className="border-t border-gray-100 pt-4 space-y-2 mb-4 text-xs sm:text-sm">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Rent:</span>
@@ -374,11 +376,10 @@ export default function TenantDashboard() {
                         {bill.dueDate && (
                           <div className="flex justify-between text-xs sm:text-sm">
                             <span className="text-gray-600">Due Date:</span>
-                            <span className={`font-medium ${
-                              new Date(bill.dueDate) < new Date() && bill.status === 'pending' 
-                                ? 'text-red-600' 
+                            <span className={`font-medium ${new Date(bill.dueDate) < new Date() && bill.status === 'pending'
+                                ? 'text-red-600'
                                 : 'text-gray-700'
-                            }`}>
+                              }`}>
                               {new Date(bill.dueDate).toLocaleDateString()}
                             </span>
                           </div>

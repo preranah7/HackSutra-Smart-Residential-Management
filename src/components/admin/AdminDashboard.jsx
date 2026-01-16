@@ -13,6 +13,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import Alert from '../common/Alert';
 import { collection, onSnapshot, query, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import NotificationPermission from '../NotificationPermission';
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -195,9 +196,8 @@ export default function AdminDashboard() {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed lg:static w-72 bg-white shadow-sm min-h-screen flex flex-col z-40 transition-transform duration-300 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      }`}>
+      <div className={`fixed lg:static w-72 bg-white shadow-sm min-h-screen flex flex-col z-40 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
         <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-gray-200">
@@ -220,8 +220,8 @@ export default function AdminDashboard() {
                   key={item.id}
                   onClick={() => handleMenuClick(item.id)}
                   className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 rounded-lg transition-colors text-sm font-medium ${isActive
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-indigo-600 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
                     }`}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
@@ -249,7 +249,10 @@ export default function AdminDashboard() {
         <div className="p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
           {activeSection === 'overview' && (
             <div className="max-w-full">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8">Dashboard Overview</h1>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Dashboard Overview</h1>
+                <NotificationPermission userId={user.uid} userRole="admin" />
+              </div>
 
               {/* Stats Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -300,8 +303,8 @@ export default function AdminDashboard() {
                           <p className="text-sm text-gray-600 truncate">{complaint.category}</p>
                         </div>
                         <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${complaint.status === 'open' ? 'bg-red-100 text-red-700' :
-                            complaint.status === 'in-progress' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-green-100 text-green-700'
+                          complaint.status === 'in-progress' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-green-100 text-green-700'
                           }`}>
                           {complaint.status}
                         </span>
@@ -416,8 +419,8 @@ function UserManagementSection({ users }) {
                   </td>
                   <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                        user.role === 'landlord' ? 'bg-blue-100 text-blue-700' :
-                          'bg-green-100 text-green-700'
+                      user.role === 'landlord' ? 'bg-blue-100 text-blue-700' :
+                        'bg-green-100 text-green-700'
                       }`}>
                       {user.role}
                     </span>
@@ -506,8 +509,8 @@ function BillTrackingSection({ bills }) {
                   </td>
                   <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${bill.status === 'paid' ? 'bg-green-100 text-green-700' :
-                        bill.status === 'overdue' ? 'bg-red-100 text-red-700' :
-                          'bg-yellow-100 text-yellow-700'
+                      bill.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
                       }`}>
                       {bill.status}
                     </span>
@@ -545,9 +548,9 @@ function ComplaintsSection({ complaints, onStatusChange }) {
                 <p className="text-sm text-gray-600 mt-1 break-words line-clamp-3">{complaint.description}</p>
               </div>
               <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${complaint.priority === 'emergency' ? 'bg-red-100 text-red-700' :
-                  complaint.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                    complaint.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-blue-100 text-blue-700'
+                complaint.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+                  complaint.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-blue-100 text-blue-700'
                 }`}>
                 {complaint.priority}
               </span>
@@ -569,8 +572,8 @@ function ComplaintsSection({ complaints, onStatusChange }) {
               <div className="flex justify-between items-center gap-2">
                 <span className="text-gray-600">Status:</span>
                 <span className={`font-medium ${complaint.status === 'open' ? 'text-red-600' :
-                    complaint.status === 'in-progress' ? 'text-yellow-600' :
-                      'text-green-600'
+                  complaint.status === 'in-progress' ? 'text-yellow-600' :
+                    'text-green-600'
                   }`}>
                   {complaint.status}
                 </span>
@@ -637,8 +640,8 @@ function ParkingSection({ parkingSlots, parkingStats }) {
               <div
                 key={slot.id}
                 className={`p-2 sm:p-3 rounded-lg text-center text-xs font-medium ${slot.status === 'available' ? 'bg-green-100 text-green-700' :
-                    slot.status === 'reserved' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-red-100 text-red-700'
+                  slot.status === 'reserved' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
                   }`}
               >
                 {slot.slotNumber}
